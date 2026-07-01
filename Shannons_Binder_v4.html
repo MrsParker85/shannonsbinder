@@ -1,0 +1,3305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shannon's Binder — Life Rebuild Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  /* Neutrals — Ironside Gray / Echo / Polar Grey family */
+  --ink:#676563;
+  --ink-soft:#8B8987;
+  --paper:#F1EFED;
+  --paper-2:#C1BFBC;
+  --white:#FAFAF9;
+  --line:#D1DCDB;
+
+  /* Section accents — grey/teal family only, pushed toward visibly teal hues */
+  --moss:#15676C;
+  --moss-light:#DCE9E9;
+  --gold:#50ACA6;
+  --gold-light:#DDF0EE;
+  --slate:#1B4A52;
+  --slate-light:#DCE4E5;
+  --clay:#339595;
+  --clay-light:#D7EBEA;
+  --rose:#6FB89E;
+  --rose-light:#E2F0E9;
+
+  --font-display:'Fraunces', serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+
+  --radius:10px;
+  --radius-lg:16px;
+  --shadow-tab: 2px 0 6px rgba(38,36,32,0.08);
+  --shadow-card: 0 1px 3px rgba(38,36,32,0.08), 0 1px 2px rgba(38,36,32,0.04);
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  font-family:var(--font-body);
+  background:var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{ font-family:var(--font-display); margin:0; color:var(--ink); }
+p{ margin:0 0 .6em; line-height:1.5; }
+::selection{ background:var(--gold-light); }
+a{ color:var(--moss); }
+
+button{
+  font-family:var(--font-body);
+  cursor:pointer;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  transition:transform .08s ease, box-shadow .15s ease;
+}
+button:active{ transform:translateY(1px); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{
+  outline:3px solid var(--gold);
+  outline-offset:1px;
+}
+
+input[type="text"], input[type="number"], input[type="date"], input[type="time"], textarea, select{
+  font-family:var(--font-body);
+  font-size:.95rem;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--white);
+  color:var(--ink);
+  width:100%;
+}
+textarea{ resize:vertical; min-height:64px; }
+label{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; display:block; margin-bottom:4px; }
+
+.field{ margin-bottom:14px; }
+.field-row{ display:flex; gap:12px; flex-wrap:wrap; }
+.field-row > .field{ flex:1; min-width:140px; }
+
+/* ============================================================
+   LAYOUT — APP SHELL
+   ============================================================ */
+.app{
+  display:flex;
+  min-height:100vh;
+}
+
+/* --- Tab rail (signature element: binder index tabs) --- */
+.tab-rail{
+  width:220px;
+  flex-shrink:0;
+  background:var(--paper-2);
+  border-right:1px solid var(--line);
+  padding:18px 0 18px 0;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+.rail-title{
+  font-family:var(--font-display);
+  font-size:1.05rem;
+  font-weight:600;
+  padding:0 18px 14px 22px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:10px;
+  color:var(--ink);
+}
+.rail-title small{
+  display:block;
+  font-family:var(--font-body);
+  font-weight:500;
+  font-size:.68rem;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:var(--ink-soft);
+  margin-top:3px;
+}
+.tab-btn{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:calc(100% - 10px);
+  text-align:left;
+  background:transparent;
+  border-radius:0 8px 8px 0;
+  padding:9px 12px 9px 22px;
+  margin:2px 0;
+  font-size:.84rem;
+  font-weight:600;
+  color:var(--ink-soft);
+  position:relative;
+  border-left:4px solid transparent;
+}
+.tab-btn .tab-num{
+  font-family:var(--font-mono);
+  font-size:.68rem;
+  opacity:.55;
+  width:16px;
+  flex-shrink:0;
+}
+.tab-btn:hover{ background:var(--white); color:var(--ink); }
+.tab-btn.active{
+  background:var(--white);
+  color:var(--ink);
+  box-shadow:var(--shadow-tab);
+}
+.tab-btn.active{ border-left-color:var(--tab-color, var(--moss)); }
+
+.rail-group-label{
+  font-family:var(--font-body);
+  font-weight:700;
+  font-size:.65rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--ink-soft);
+  padding:16px 22px 6px;
+}
+.rail-group-label:first-of-type{ padding-top:2px; }
+
+/* --- Sign-in / loading gate --- */
+.auth-gate{
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--paper);
+  z-index:100;
+  padding:24px;
+}
+.auth-card{
+  background:var(--white);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-card);
+  padding:40px 36px;
+  max-width:360px;
+  width:100%;
+  text-align:center;
+}
+.auth-title{
+  font-family:var(--font-display);
+  font-size:1.4rem;
+  font-weight:600;
+  color:var(--ink);
+  margin-bottom:10px;
+}
+.auth-sub{
+  font-size:.88rem;
+  color:var(--ink-soft);
+  margin-bottom:22px;
+  line-height:1.5;
+}
+.auth-btn{
+  width:100%;
+  padding:11px 16px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--white);
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:.9rem;
+  color:var(--ink);
+  cursor:pointer;
+}
+.auth-btn:hover{ background:var(--paper); }
+.auth-error{
+  margin-top:14px;
+  font-size:.8rem;
+  color:#B3473D;
+}
+
+/* --- Top user bar (sign-out access on every device) --- */
+.user-bar{
+  display:flex; align-items:center; justify-content:flex-end; gap:12px;
+  padding:8px 18px;
+  background:var(--paper-2);
+  border-bottom:1px solid var(--line);
+  font-size:.78rem;
+  color:var(--ink-soft);
+}
+.user-bar button{
+  font-family:var(--font-body); font-weight:600; font-size:.76rem;
+  color:var(--ink); background:var(--white); border:1px solid var(--line);
+  border-radius:6px; padding:4px 12px; cursor:pointer;
+}
+.user-bar button:hover{ background:var(--paper); }
+
+/* --- Main page area --- */
+.pages{ flex:1; min-width:0; }
+.page{
+  display:none;
+  padding:36px 48px 80px;
+  max-width:880px;
+  margin:0 auto;
+}
+.page.active{ display:block; }
+
+.page-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:6px;
+  padding-bottom:18px;
+  border-bottom:3px solid var(--accent, var(--moss));
+}
+.page-header h1{ font-size:1.9rem; font-weight:600; line-height:1.15; }
+.page-eyebrow{
+  font-family:var(--font-body);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:.72rem;
+  font-weight:700;
+  color:var(--accent, var(--moss));
+  margin-bottom:6px;
+  display:block;
+}
+.page-sub{ color:var(--ink-soft); font-size:.95rem; margin-top:6px; max-width:560px; }
+.page-body{ margin-top:26px; }
+
+.print-btn{
+  flex-shrink:0;
+  background:var(--ink);
+  color:var(--white);
+  padding:9px 16px;
+  font-size:.82rem;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+}
+.print-btn:hover{ background:#4E4C4A; }
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
+.card{
+  background:var(--white);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:20px 22px;
+  margin-bottom:18px;
+  box-shadow:var(--shadow-card);
+}
+.card h3{ font-size:1.05rem; margin-bottom:10px; }
+.card h4{ font-size:.92rem; margin-bottom:8px; }
+.card-tinted{ background:var(--tint, var(--moss-light)); border-color:transparent; }
+
+.section-label{
+  font-size:.72rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--ink-soft);
+  margin:28px 0 10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.section-label::after{ content:''; flex:1; height:1px; background:var(--line); }
+
+.note-strip{
+  background:var(--gold-light);
+  border-left:4px solid var(--gold);
+  border-radius:8px;
+  padding:10px 14px;
+  font-size:.88rem;
+  color:var(--ink);
+  margin-bottom:16px;
+}
+.note-strip.clay{ background:var(--clay-light); border-left-color:var(--clay); }
+.note-strip.moss{ background:var(--moss-light); border-left-color:var(--moss); }
+.note-strip.slate{ background:var(--slate-light); border-left-color:var(--slate); }
+
+.quote-block{
+  font-family:var(--font-display);
+  font-style:italic;
+  font-size:1.15rem;
+  color:var(--ink);
+  border-left:3px solid var(--accent,var(--moss));
+  padding-left:16px;
+  margin:16px 0;
+}
+
+.checklist{ list-style:none; margin:0; padding:0; }
+.checklist li{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:7px 0;
+  border-bottom:1px dashed var(--line);
+  font-size:.92rem;
+}
+.checklist li:last-child{ border-bottom:none; }
+.checklist input[type="checkbox"]{ margin-top:3px; flex-shrink:0; }
+.checklist label{
+  font-weight:400;
+  text-transform:none;
+  letter-spacing:0;
+  color:var(--ink);
+  font-size:.92rem;
+  cursor:pointer;
+}
+
+input[type="checkbox"]{
+  width:18px; height:18px;
+  accent-color:var(--moss);
+  cursor:pointer;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  font-size:.7rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  padding:4px 10px;
+  border-radius:99px;
+}
+.badge.urgent{ background:var(--clay); color:var(--white); }
+.badge.progress{ background:var(--gold); color:var(--white); }
+.badge.done{ background:var(--moss); color:var(--white); }
+.badge.hold{ background:var(--slate-light); color:var(--slate); }
+.badge.warn{ background:#4E4C4A; color:var(--gold-light); }
+
+.progress-track{
+  height:12px;
+  background:var(--paper-2);
+  border-radius:99px;
+  overflow:hidden;
+  border:1px solid var(--line);
+}
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg, var(--moss), var(--gold));
+  border-radius:99px;
+  transition:width .3s ease;
+}
+.progress-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; font-size:.88rem; font-weight:600; }
+.progress-row .amt{ font-family:var(--font-mono); color:var(--ink-soft); font-weight:500; font-size:.82rem; }
+
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.grid-4{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; }
+@media(max-width:700px){ .grid-2,.grid-3,.grid-4{ grid-template-columns:1fr; } }
+
+table.ledger{ width:100%; border-collapse:collapse; font-size:.88rem; }
+table.ledger th{ text-align:left; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); padding:6px 8px; border-bottom:2px solid var(--line); }
+table.ledger td{ padding:8px 8px; border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:.85rem; }
+table.ledger td.label-cell{ font-family:var(--font-body); }
+table.ledger tr:last-child td{ border-bottom:none; }
+
+.pill-row{ display:flex; flex-wrap:wrap; gap:8px; }
+.pill{
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  border-radius:99px;
+  padding:6px 14px;
+  font-size:.82rem;
+  font-weight:600;
+  color:var(--ink-soft);
+  cursor:pointer;
+  user-select:none;
+}
+.pill.active{ background:var(--moss); color:var(--white); border-color:var(--moss); }
+
+.mood-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.mood-opt{
+  flex:1;
+  min-width:78px;
+  text-align:center;
+  padding:12px 6px;
+  border-radius:10px;
+  border:2px solid var(--line);
+  background:var(--white);
+  cursor:pointer;
+  font-size:.78rem;
+  font-weight:600;
+  color:var(--ink-soft);
+}
+.mood-opt .emoji{ font-size:1.5rem; display:block; margin-bottom:4px; }
+.mood-opt.active{ border-color:var(--gold); background:var(--gold-light); color:var(--ink); }
+
+.small-btn{
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  color:var(--ink);
+  padding:7px 14px;
+  font-size:.8rem;
+}
+.small-btn:hover{ background:var(--white); }
+.small-btn.primary{ background:var(--moss); color:var(--white); border-color:var(--moss); }
+.small-btn.primary:hover{ background:#0D4A4E; }
+.small-btn.danger{ background:transparent; color:var(--clay); border-color:var(--clay); }
+.small-btn.danger:hover{ background:var(--clay-light); }
+
+.flex-between{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.muted{ color:var(--ink-soft); font-size:.85rem; }
+.mono{ font-family:var(--font-mono); }
+.tag{ font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:6px; background:var(--paper-2); color:var(--ink-soft); }
+
+/* Save indicator */
+.save-pill{
+  position:fixed;
+  bottom:18px;
+  right:24px;
+  background:var(--ink);
+  color:var(--white);
+  font-size:.78rem;
+  font-weight:600;
+  padding:8px 16px;
+  border-radius:99px;
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .25s ease, transform .25s ease;
+  pointer-events:none;
+  z-index:200;
+}
+.save-pill.show{ opacity:1; transform:translateY(0); }
+
+/* ============================================================
+   HERO STAMP (Dashboard signature element)
+   ============================================================ */
+.stamp-wrap{ display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
+.stamp{
+  width:148px; height:148px;
+  border-radius:50%;
+  background:var(--white);
+  border:3px solid var(--gold);
+  box-shadow:inset 0 0 0 3px var(--gold-light), 0 2px 6px rgba(0,0,0,.08);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  position:relative;
+}
+.stamp::before{
+  content:'';
+  position:absolute;
+  inset:8px;
+  border:1.5px dashed var(--gold);
+  border-radius:50%;
+  opacity:.6;
+}
+.stamp .num{ font-family:var(--font-display); font-size:2.6rem; font-weight:700; color:var(--ink); line-height:1; }
+.stamp .lbl{ font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; font-weight:700; color:var(--moss); margin-top:2px; }
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .tab-rail, .no-print, .save-pill{ display:none !important; }
+  .pages{ width:100%; }
+  .page{ display:none !important; padding:0; max-width:100%; }
+  body.printing-section .page.print-target{ display:block !important; }
+  .card{ box-shadow:none; break-inside:avoid; }
+  .page-header{ break-after:avoid; }
+  a{ color:inherit; text-decoration:none; }
+  .card.is-blank-card{ display:none !important; }
+}
+
+/* Responsive */
+@media(max-width:880px){
+  .tab-rail{
+    width:100%; height:auto; position:relative; top:0;
+    display:flex; overflow-x:auto; padding:10px 8px;
+    border-right:none; border-bottom:1px solid var(--line);
+  }
+  .rail-title{ display:none; }
+  .rail-group-label{ display:none; }
+  .tab-btn{ width:auto; white-space:nowrap; border-radius:8px; border-left:none; border-bottom:4px solid transparent; padding:8px 12px; }
+  .tab-btn.active{ border-left:none; border-bottom-color:var(--tab-color, var(--moss)); }
+  .app{ flex-direction:column; }
+  .page{ padding:24px 18px 60px; }
+}
+</style>
+</head>
+<body>
+
+<div id="authGate" class="auth-gate">
+  <div class="auth-card">
+    <div class="auth-title">Shannon's Binder</div>
+    <div class="auth-sub">Sign in to load your planner. Your data syncs automatically between your phone and laptop.</div>
+    <button id="googleSignInBtn" class="auth-btn" type="button">Sign in with Google</button>
+    <div id="authError" class="auth-error" style="display:none;"></div>
+  </div>
+</div>
+
+<div id="loadingGate" class="auth-gate" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-sub">Loading your binder…</div>
+  </div>
+</div>
+
+<div id="appShell" style="display:none;">
+<div class="user-bar no-print">
+  <span id="userBadge"></span>
+  <button id="signOutBtn" type="button">Sign out</button>
+</div>
+<div class="app">
+
+  <nav class="tab-rail no-print" id="tabRail">
+    <div class="rail-title">Shannon's Binder<small>Life Rebuild Planner</small></div>
+
+    <div class="rail-group-label">Daily Command</div>
+    <button class="tab-btn" data-target="dashboard" style="--tab-color:var(--gold)"><span class="tab-num">01</span> Dashboard</button>
+    <button class="tab-btn" data-target="checkin" style="--tab-color:var(--gold)"><span class="tab-num">02</span> Daily Check-In</button>
+    <button class="tab-btn" data-target="braindump" style="--tab-color:var(--rose)"><span class="tab-num">16</span> Brain Dump</button>
+
+    <div class="rail-group-label">Household Operations</div>
+    <button class="tab-btn" data-target="appointments" style="--tab-color:var(--clay)"><span class="tab-num">17</span> Appointments &amp; Calendar</button>
+    <button class="tab-btn" data-target="homereset" style="--tab-color:var(--clay)"><span class="tab-num">09</span> Home Reset</button>
+    <button class="tab-btn" data-target="transportation" style="--tab-color:var(--clay)"><span class="tab-num">18</span> Transportation</button>
+    <button class="tab-btn" data-target="supplies" style="--tab-color:var(--clay)"><span class="tab-num">19</span> Supplies &amp; Inventory</button>
+    <button class="tab-btn" data-target="mealplan" style="--tab-color:var(--clay)"><span class="tab-num">10</span> Meal Plan</button>
+
+    <div class="rail-group-label">Financial</div>
+    <button class="tab-btn" data-target="financial" style="--tab-color:var(--slate)"><span class="tab-num">05</span> Financial Center</button>
+    <button class="tab-btn" data-target="savings" style="--tab-color:var(--slate)"><span class="tab-num">06</span> Savings Goals</button>
+    <button class="tab-btn" data-target="bankruptcy" style="--tab-color:var(--slate)"><span class="tab-num">07</span> After Bankruptcy</button>
+
+    <div class="rail-group-label">Family &amp; Personal</div>
+    <button class="tab-btn" data-target="sobriety" style="--tab-color:var(--moss)"><span class="tab-num">03</span> Sobriety &amp; Coping</button>
+    <button class="tab-btn" data-target="mentalhealth" style="--tab-color:var(--moss)"><span class="tab-num">04</span> Mental Health Hub</button>
+    <button class="tab-btn" data-target="purpose" style="--tab-color:var(--rose)"><span class="tab-num">11</span> Purpose &amp; Vision</button>
+    <button class="tab-btn" data-target="challenge" style="--tab-color:var(--gold)"><span class="tab-num">08</span> 30-Day Rebuild</button>
+    <button class="tab-btn" data-target="dates" style="--tab-color:var(--rose)"><span class="tab-num">12</span> Important Dates</button>
+    <button class="tab-btn" data-target="gifts" style="--tab-color:var(--rose)"><span class="tab-num">13</span> Gift List</button>
+    <button class="tab-btn" data-target="contacts" style="--tab-color:var(--rose)"><span class="tab-num">14</span> Contact Cards</button>
+
+    <div class="rail-group-label">Reflection</div>
+    <button class="tab-btn" data-target="sundayreview" style="--tab-color:var(--moss)"><span class="tab-num">15</span> Sunday Review</button>
+  </nav>
+
+  <main class="pages" id="pages">
+<section id="dashboard" class="page active" style="--accent:var(--gold)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 01 · Daily · Resets each print</span>
+      <h1>Dashboard</h1>
+      <p class="page-sub">Hey Shannon — what's one thing you can do today?</p>
+    </div>
+    <button class="print-btn no-print" data-print="dashboard">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="card" style="display:flex; flex-wrap:wrap; gap:24px; align-items:center;">
+      <div class="stamp-wrap" style="flex:1; min-width:260px;">
+        <div class="stamp">
+          <div class="num" id="dashStreakNum">—</div>
+          <div class="lbl">days sober</div>
+        </div>
+        <div>
+          <div class="muted" id="dashTodayDate" style="font-weight:600; color:var(--ink); font-size:1rem;"></div>
+          <div class="muted" id="dashChallengeDay" style="margin-top:4px;"></div>
+          <div class="muted" id="dashTheme" style="margin-top:2px; font-weight:600; color:var(--moss);"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>How am I right now?</h3>
+      <div class="mood-row" data-pillgroup-temp="dashMood">
+        <div class="mood-opt" data-value="struggling"><span class="emoji">😔</span>Struggling</div>
+        <div class="mood-opt" data-value="low"><span class="emoji">😟</span>Low</div>
+        <div class="mood-opt" data-value="gettingby"><span class="emoji">😐</span>Getting by</div>
+        <div class="mood-opt" data-value="okay"><span class="emoji">🙂</span>Okay</div>
+        <div class="mood-opt" data-value="good"><span class="emoji">😊</span>Good</div>
+        <div class="mood-opt" data-value="manic"><span class="emoji">😵‍💫</span>Manic</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Top 3 for today</h3>
+      <ul class="checklist" id="dashTop3">
+        <li><input type="checkbox"><input type="text" placeholder="Task 1" style="border:none; border-bottom:1px solid var(--line); border-radius:0; padding:4px 2px;"></li>
+        <li><input type="checkbox"><input type="text" placeholder="Task 2" style="border:none; border-bottom:1px solid var(--line); border-radius:0; padding:4px 2px;"></li>
+        <li><input type="checkbox"><input type="text" placeholder="Task 3" style="border:none; border-bottom:1px solid var(--line); border-radius:0; padding:4px 2px;"></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Financial milestones</h3>
+      <div id="dashMilestones"></div>
+      <p class="muted" style="margin-top:10px;">Full detail in Section 05 — Financial Center.</p>
+    </div>
+
+    <div class="card card-tinted" style="--tint:var(--gold-light);">
+      <h3 style="margin-bottom:6px;">Today's affirmation</h3>
+      <p class="quote-block" id="dashAffirmation" style="--accent:var(--gold);"></p>
+    </div>
+  </div>
+</section>
+<section id="checkin" class="page" style="--accent:var(--gold)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 02 · Daily · Resets each print</span>
+      <h1>Daily Check-In</h1>
+      <p class="page-sub">Morning sets the day. Evening closes it. Both take two minutes.</p>
+    </div>
+    <button class="print-btn no-print" data-print="checkin">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="section-label">☀ Morning — 8:20 AM</div>
+
+    <div class="card">
+      <ul class="checklist">
+        <li><input type="checkbox" id="ckCozi1"><label for="ckCozi1">Check Cozi Family Calendar for today</label></li>
+        <li><input type="checkbox" id="ckSoberIntent"><label for="ckSoberIntent">I will be sober today</label></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Mood at wakeup</h3>
+      <div class="mood-row" data-pillgroup-temp="amMood">
+        <div class="mood-opt" data-value="struggling"><span class="emoji">😔</span>Struggling</div>
+        <div class="mood-opt" data-value="low"><span class="emoji">😟</span>Low</div>
+        <div class="mood-opt" data-value="gettingby"><span class="emoji">😐</span>Getting by</div>
+        <div class="mood-opt" data-value="okay"><span class="emoji">🙂</span>Okay</div>
+        <div class="mood-opt" data-value="good"><span class="emoji">😊</span>Good</div>
+        <div class="mood-opt" data-value="manic"><span class="emoji">😵‍💫</span>Manic</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>What do I need today?</label>
+        <textarea placeholder="One or two sentences..."></textarea>
+      </div>
+      <div class="field">
+        <label>Top 3 tasks</label>
+        <div class="field-row">
+          <input type="text" placeholder="1.">
+          <input type="text" placeholder="2.">
+          <input type="text" placeholder="3.">
+        </div>
+      </div>
+      <div class="field">
+        <label>Coping tool for today</label>
+        <select data-other-target="copingOtherBox">
+          <option value="">Choose one...</option>
+          <option>Journal</option>
+          <option>Walk / step outside</option>
+          <option>Deep breathing</option>
+          <option>Call or text someone</option>
+          <option>Distraction (show, music)</option>
+          <option>Other</option>
+        </select>
+        <input type="text" id="copingOtherBox" placeholder="What coping tool?" style="display:none; margin-top:8px;">
+      </div>
+    </div>
+
+    <div class="section-label">🌙 Evening — 10:00 PM</div>
+
+    <div class="card">
+      <ul class="checklist">
+        <li><input type="checkbox" id="ckCozi2"><label for="ckCozi2">Check Cozi Family Calendar for tomorrow</label></li>
+        <li><input type="checkbox" id="ckSoberConfirm"><label for="ckSoberConfirm">I stayed sober today</label></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Mood at end of day</h3>
+      <div class="mood-row" data-pillgroup-temp="pmMood">
+        <div class="mood-opt" data-value="struggling"><span class="emoji">😔</span>Struggling</div>
+        <div class="mood-opt" data-value="low"><span class="emoji">😟</span>Low</div>
+        <div class="mood-opt" data-value="gettingby"><span class="emoji">😐</span>Getting by</div>
+        <div class="mood-opt" data-value="okay"><span class="emoji">🙂</span>Okay</div>
+        <div class="mood-opt" data-value="good"><span class="emoji">😊</span>Good</div>
+        <div class="mood-opt" data-value="manic"><span class="emoji">😵‍💫</span>Manic</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>Top 3 — did I get to them?</label>
+        <ul class="checklist">
+          <li><input type="checkbox"><label>Task 1 done</label></li>
+          <li><input type="checkbox"><label>Task 2 done</label></li>
+          <li><input type="checkbox"><label>Task 3 done</label></li>
+        </ul>
+      </div>
+      <div class="field">
+        <label>One thing that happened today that I want to remember</label>
+        <textarea></textarea>
+      </div>
+      <div class="field">
+        <label>Tomorrow's Top 3</label>
+        <div class="field-row">
+          <input type="text" placeholder="1.">
+          <input type="text" placeholder="2.">
+          <input type="text" placeholder="3.">
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-block" style="--accent:var(--gold);">You don't need a perfect day. You need a started one.</div>
+  </div>
+</section>
+<section id="sobriety" class="page" style="--accent:var(--moss)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 03 · Daily tracking · Saved on this device</span>
+      <h1>Sobriety &amp; Coping</h1>
+      <p class="page-sub">Counting from June 1, 2026. Update the date below any time you need to.</p>
+    </div>
+    <button class="print-btn no-print" data-print="sobriety">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="card" style="display:flex; gap:24px; flex-wrap:wrap; align-items:center;">
+      <div class="stamp-wrap">
+        <div class="stamp">
+          <div class="num" id="sobStreakNum">—</div>
+          <div class="lbl">days sober</div>
+        </div>
+        <div style="min-width:220px;">
+          <div class="field" style="margin-bottom:10px;">
+            <label>Counting from</label>
+            <input type="date" data-store="sobrietyStart" id="sobrietyStartInput">
+          </div>
+          <button class="small-btn no-print" id="restartSobBtn">Restart sobriety tracker</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:10px;">
+        <h3 style="margin:0;">100-day tracker</h3>
+        <div class="pill-row no-print" data-pillgroup-temp="sobPenMode">
+          <div class="pill active" data-value="sober">🟢 Mark sober day</div>
+          <div class="pill" data-value="reset">⚪ Mark relapse day</div>
+        </div>
+      </div>
+      <p class="muted" style="margin-bottom:12px;">Click a square for each day. This grid is saved on this device — it'll be here next time you open the file.</p>
+      <div id="sobGrid" style="display:grid; grid-template-columns:repeat(20,1fr); gap:5px;"></div>
+    </div>
+
+    <div class="card">
+      <h3>Milestones reached</h3>
+      <ul class="checklist" id="milestoneBadges">
+        <li><input type="checkbox" data-store="badge7" id="badge7"><label for="badge7">⭐ 10 days</label></li>
+        <li><input type="checkbox" data-store="badge14" id="badge14"><label for="badge14">⭐⭐ 25 days</label></li>
+        <li><input type="checkbox" data-store="badge30" id="badge30"><label for="badge30">🌟 50 days</label></li>
+        <li><input type="checkbox" data-store="badge60" id="badge60"><label for="badge60">🌟🌟 75 days</label></li>
+        <li><input type="checkbox" data-store="badge90" id="badge90"><label for="badge90">🏆 100 days</label></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>My coping toolkit</h3>
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div class="field">
+          <label>Go-to tool #1</label>
+          <input type="text" data-store="copingTool1" placeholder="e.g., journal for 5 minutes">
+        </div>
+        <div class="field">
+          <label>Go-to tool #2</label>
+          <input type="text" data-store="copingTool2" placeholder="e.g., text a friend">
+        </div>
+      </div>
+      <div class="grid-2">
+        <details class="card" style="margin-bottom:0;"><summary style="cursor:pointer; font-weight:600;">🖊 Journal</summary><p style="margin-top:8px;">Write what you're feeling without editing it. 5 minutes is enough.</p></details>
+        <details class="card" style="margin-bottom:0;"><summary style="cursor:pointer; font-weight:600;">🚶 Walk</summary><p style="margin-top:8px;">Even 10 minutes outside changes your nervous system.</p></details>
+        <details class="card" style="margin-bottom:0;"><summary style="cursor:pointer; font-weight:600;">🌬 Breathe</summary><p style="margin-top:8px;">4 counts in, hold 4, out 4. Repeat 3 times.</p></details>
+        <details class="card" style="margin-bottom:0;"><summary style="cursor:pointer; font-weight:600;">📱 Connect</summary><p style="margin-top:8px;">One text. One call. You don't have to explain everything.</p></details>
+        <details class="card" style="margin-bottom:0; grid-column:1/-1;"><summary style="cursor:pointer; font-weight:600;">🎵 Music / show</summary><p style="margin-top:8px;">Sometimes you just need to not be in your head for a while. That's okay.</p></details>
+      </div>
+    </div>
+
+    <details class="card" style="border-color:var(--clay);">
+      <summary style="cursor:pointer; font-weight:700; color:var(--clay);">If I'm really struggling</summary>
+      <div style="margin-top:12px;">
+        <p><strong>988 Suicide &amp; Crisis Lifeline</strong> — call or text 988</p>
+        <p><strong>Crisis Text Line</strong> — text HOME to 741741</p>
+        <div class="field">
+          <label>Person I can call</label>
+          <input type="text" data-store="crisisContact" placeholder="Name and number">
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+<section id="mentalhealth" class="page" style="--accent:var(--moss)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 04 · Weekly + daily · Appointments saved on this device</span>
+      <h1>Mental Health Hub</h1>
+      <p class="page-sub">Therapy and psychiatry, mood patterns, and one prompt to bring to your next session.</p>
+    </div>
+    <button class="print-btn no-print" data-print="mentalhealth">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="note-strip moss">Treat these as non-negotiable. No rescheduling unless absolutely necessary.</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Therapist</h3>
+        <p class="muted" style="margin-bottom:10px;">Full contact info lives in Section 14 — Contact Cards.</p>
+        <div class="field"><label>Notes</label><textarea placeholder="Resets each print"></textarea></div>
+        <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400; color:var(--ink);"><input type="checkbox" style="width:16px;height:16px;"> Appointment attended this week</label>
+      </div>
+      <div class="card">
+        <h3>Psychiatrist</h3>
+        <p class="muted" style="margin-bottom:10px;">Full contact info lives in Section 14 — Contact Cards.</p>
+        <div class="field"><label>Notes</label><textarea placeholder="Resets each print"></textarea></div>
+        <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400; color:var(--ink);"><input type="checkbox" style="width:16px;height:16px;"> Appointment attended this week</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>One thing I want to bring to my next session</label>
+      <textarea></textarea>
+    </div>
+
+    <div class="card">
+      <h3>This week's mood</h3>
+      <div class="grid-3" style="grid-template-columns:repeat(7,1fr); gap:8px;">
+        <div><label style="text-align:center; display:block;">Sun</label><select style="text-align:center; padding:6px 4px; font-size:.8rem;"><option value="">—</option><option>😔 Struggling</option><option>😟 Low</option><option>😐 Getting by</option><option>🙂 Okay</option><option>😊 Good</option><option>😵‍💫 Manic</option></select></div>
+        <div><label style="text-align:center; display:block;">Mon</label><select style="text-align:center; padding:6px 4px; font-size:.8rem;"><option value="">—</option><option>😔 Struggling</option><option>😟 Low</option><option>😐 Getting by</option><option>🙂 Okay</option><option>😊 Good</option><option>😵‍💫 Manic</option></select></div>
+        <div><label style="text-align:center; display:block;">Tue</label><select style="text-align:center; padding:6px 4px; font-size:.8rem;"><option value="">—</option><option>😔 Struggling</option><option>😟 Low</option><option>😐 Getting by</option><option>🙂 Okay</option><option>😊 Good</option><option>😵‍💫 Manic</option></select></div>
+        <div><label style="text-align:center; display:block;">Wed</label><select style="text-align:center; padding:6px 4px; font-size:.8rem;"><option value="">—</option><option>😔 Struggling</option><option>😟 Low</option><option>😐 Getting by</option><option>🙂 Okay</option><option>😊 Good</option><option>😵‍💫 Manic</option></select></div>
+        <div><label style="text-align:center; display:block;">Thu</label><select style="text-align:center; padding:6px 4px; font-size:.8rem;"><option value="">—</option><option>😔 Struggling</option><option>😟 Low</option><option>😐 Getting by</option><option>🙂 Okay</option><option>😊 Good</option><option>😵‍💫 Manic</option></select></div>
+        <div><label style="text-align:center; display:block;">Fri</label><select style="text-align:center; padding:6px 4px; font-size:.8rem;"><option value="">—</option><option>😔 Struggling</option><option>😟 Low</option><option>😐 Getting by</option><option>🙂 Okay</option><option>😊 Good</option><option>😵‍💫 Manic</option></select></div>
+        <div><label style="text-align:center; display:block;">Sat</label><select style="text-align:center; padding:6px 4px; font-size:.8rem;"><option value="">—</option><option>😔 Struggling</option><option>😟 Low</option><option>😐 Getting by</option><option>🙂 Okay</option><option>😊 Good</option><option>😵‍💫 Manic</option></select></div>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label>This week I noticed</label>
+        <textarea></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Symptom awareness <span class="muted" style="font-weight:400;">(informational only — not scored)</span></h3>
+      <div class="field"><label>Did I sleep more or less than usual?</label>
+        <select><option>—</option><option>More</option><option>Less</option><option>About the same</option></select>
+      </div>
+      <div class="field"><label>Did I have more intrusive thoughts than usual?</label>
+        <select><option>—</option><option>Yes</option><option>No</option><option>Hard to say</option></select>
+      </div>
+      <div class="field"><label>Did I feel more disconnected than usual?</label>
+        <select><option>—</option><option>Yes</option><option>No</option><option>Hard to say</option></select>
+      </div>
+      <div class="field"><label>Did I experience any hyperarousal or "on guard" episodes?</label>
+        <select><option>—</option><option>Yes</option><option>No</option><option>Hard to say</option></select>
+      </div>
+    </div>
+
+    <div class="card card-tinted" style="--tint:var(--moss-light);">
+      <h3>This week's journal prompt</h3>
+      <p class="quote-block" id="mhJournalPrompt" style="--accent:var(--moss);"></p>
+      <textarea style="margin-top:8px;"></textarea>
+    </div>
+  </div>
+</section>
+<section id="financial" class="page" style="--accent:var(--slate)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 05 · Per payday · Status badges saved on this device</span>
+      <h1>Financial Command Center</h1>
+      <p class="page-sub">Not financial or legal advice. Built from your own numbers, June 15, 2026.</p>
+    </div>
+    <button class="print-btn no-print" data-print="financial">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="flex-between no-print" style="margin-bottom:4px;">
+      <div class="section-label" style="margin-bottom:0;">Payday plan — next 4 weeks</div>
+      <button class="small-btn" id="regenPaydayBtn">↻ Regenerate</button>
+    </div>
+    <p class="muted no-print" style="margin-bottom:14px;">Pulls from your actual pay schedule below — always shows what's coming up next, not a fixed date range. Bills/allocations per check are yours to fill in and reset each time you print.</p>
+
+    <div id="paydayPlanHost"></div>
+
+    <div class="section-label">Past-due items</div>
+
+    <div id="finDebtTrackers"></div>
+
+    <div class="section-label">Other milestones</div>
+
+    <div class="card" id="finMilestoneCard">
+      <div class="field" data-milestone="lawyer">
+        <div class="progress-row"><span>Lawyer paid off — target July 29 (frees $300/mo)</span></div>
+        <div class="progress-track"><div class="progress-fill" id="fin-bar-lawyer" style="width:5%"></div></div>
+      </div>
+      <div class="field" data-milestone="savings" style="margin-bottom:0;">
+        <div class="progress-row"><span>Savings started — $500/mo target</span></div>
+        <div class="progress-track"><div class="progress-fill" id="fin-bar-savings" style="width:5%"></div></div>
+      </div>
+    </div>
+
+    <div class="section-label">September and beyond</div>
+
+    <div class="card card-tinted" style="--tint:var(--slate-light);">
+      <div class="grid-2">
+        <div>Emergency fund: <strong>$500/mo</strong></div>
+        <div>Savings: <strong>$200/mo</strong></div>
+        <div>Flex: <strong>$400/mo</strong></div>
+        <div>Fun money: <strong>$120/mo</strong></div>
+      </div>
+    </div>
+
+    <details class="card">
+      <summary style="cursor:pointer; font-weight:700;">The 4 Rules</summary>
+      <ol style="margin-top:10px; padding-left:20px;">
+        <li>Pay fixed bills first.</li>
+        <li>Move savings the same day you get paid.</li>
+        <li>Flex is not spending money.</li>
+        <li>Sunday Reset every week.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+<section id="savings" class="page" style="--accent:var(--slate)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 06 · Ongoing · Saved on this device</span>
+      <h1>Savings Goals Tracker</h1>
+      <p class="page-sub">Update your balance any time. The bars do the rest.</p>
+    </div>
+    <button class="print-btn no-print" data-print="savings">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div id="savingsGoals"></div>
+
+    <div class="card card-tinted" style="--tint:var(--gold-light);">
+      <div class="flex-between">
+        <h3 style="margin:0;">Total saved across all goals</h3>
+        <div class="mono" id="savingsTotal" style="font-size:1.3rem; font-weight:700;">$0</div>
+      </div>
+    </div>
+
+    <div class="note-strip">Move savings the same day you get paid — before you can spend it.</div>
+  </div>
+</section>
+<section id="bankruptcy" class="page" style="--accent:var(--slate)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 07 · Ongoing · Saved on this device</span>
+      <h1>After Bankruptcy</h1>
+      <p class="page-sub">Rebuilding credit, one careful step at a time.</p>
+    </div>
+    <button class="print-btn no-print" data-print="bankruptcy">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="card">
+      <h3>Monthly credit check</h3>
+      <div class="field-row">
+        <div class="field"><label>Date checked</label><input type="date" id="creditCheckDate"></div>
+        <div class="field"><label>Score this month</label><input type="number" id="creditScoreInput" placeholder="e.g., 580"></div>
+        <div class="field no-print" style="display:flex; align-items:flex-end;"><button class="small-btn" id="addCreditBtn" style="width:100%;">+ Add entry</button></div>
+      </div>
+      <p class="muted">Check at AnnualCreditReport.com — free weekly pulls are available.</p>
+      <div id="creditGraphHost" style="margin-top:14px;"></div>
+      <div id="creditHistoryList" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:10px;">
+        <h3 style="margin:0;">Open accounts</h3>
+        <button class="small-btn no-print" id="addAccountBtn">+ Add account</button>
+      </div>
+      <table class="ledger" id="accountsTable">
+        <tr><th>Account</th><th>Type</th><th>Opened</th><th>Balance</th><th>Status</th><th class="no-print"></th></tr>
+      </table>
+      <p class="muted" style="margin-top:10px;">Do not close old accounts unnecessarily — length of history matters.</p>
+    </div>
+
+    <div class="section-label">Rebuild timeline</div>
+
+    <div class="card">
+      <h4>Month 1 post-discharge</h4>
+      <ul class="checklist">
+        <li><input type="checkbox" data-store="bk_m1_bills" id="bk_m1_bills"><label for="bk_m1_bills">Bills checking account</label></li>
+        <li><input type="checkbox" data-store="bk_m1_spend" id="bk_m1_spend"><label for="bk_m1_spend">Spending checking account</label></li>
+        <li><input type="checkbox" data-store="bk_m1_hys" id="bk_m1_hys"><label for="bk_m1_hys">High-yield savings account</label></li>
+        <li><input type="checkbox" data-store="bk_m1_secured" id="bk_m1_secured"><label for="bk_m1_secured">Secured card <span class="muted">(keep utilization under 10%)</span></label></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>Months 2–6</h4>
+      <ul class="checklist">
+        <li><input type="checkbox" data-store="bk_m26_loan" id="bk_m26_loan"><label for="bk_m26_loan">Credit builder loan</label></li>
+        <li><input type="checkbox" data-store="bk_m26_nomiss" id="bk_m26_nomiss"><label for="bk_m26_nomiss">No missed or late payments</label></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>Months 6–12</h4>
+      <ul class="checklist">
+        <li><input type="checkbox" data-store="bk_m612_card2" id="bk_m612_card2"><label for="bk_m612_card2">Add a second card</label></li>
+      </ul>
+      <p class="muted">Once your first card has 6 months of perfect history, consider: another secured card, or an unsecured card designed for rebuilding. Do not open multiple accounts at once. Avoid unnecessary account closures.</p>
+    </div>
+
+    <div class="card">
+      <h4>Months 12–24</h4>
+      <ul class="checklist">
+        <li><input type="checkbox" data-store="bk_m1224_install" id="bk_m1224_install"><label for="bk_m1224_install">Small installment loan <span class="muted">(through the credit union opened in Month 1)</span></label></li>
+      </ul>
+    </div>
+
+    <div class="section-label">Checklist personalized for me</div>
+
+    <div class="card">
+      <ul class="checklist">
+        <li><input type="checkbox" data-store="bk_p_ef" id="bk_p_ef"><label for="bk_p_ef">Emergency fund of $1,000</label></li>
+        <li><input type="checkbox" data-store="bk_p_secured" id="bk_p_secured"><label for="bk_p_secured">One secured card ($200–$500 deposit)</label></li>
+        <li><input type="checkbox" data-store="bk_p_bill" id="bk_p_bill"><label for="bk_p_bill">One recurring bill on the card</label></li>
+        <li><input type="checkbox" data-store="bk_p_autopay" id="bk_p_autopay"><label for="bk_p_autopay">Auto-pay card in full every month</label></li>
+        <li><input type="checkbox" data-store="bk_p_builder" id="bk_p_builder"><label for="bk_p_builder">Credit-builder loan after 2–3 months</label></li>
+        <li><input type="checkbox" data-store="bk_p_card2" id="bk_p_card2"><label for="bk_p_card2">Second card after 6–12 months</label></li>
+        <li><input type="checkbox" data-store="bk_p_nocar" id="bk_p_nocar"><label for="bk_p_nocar">No new car loan unless absolutely necessary</label></li>
+      </ul>
+    </div>
+
+    <div class="note-strip clay">
+      <strong>What to avoid:</strong> Credit repair companies · Buy-here-pay-here car lots · Payday loans · Applying everywhere
+    </div>
+  </div>
+</section>
+<section id="challenge" class="page" style="--accent:var(--gold)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 08 · Daily · Checkboxes saved on this device</span>
+      <h1>30-Day Life Rebuild</h1>
+      <p class="page-sub">June 17 – July 16, 2026. One day at a time.</p>
+    </div>
+    <button class="print-btn no-print" data-print="challenge">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="note-strip" style="margin-bottom:18px;">
+      ♡ Mental Health &nbsp;·&nbsp; ✎ Productivity &nbsp;·&nbsp; ★ Purpose &nbsp;·&nbsp; ⌂ Environment &nbsp;·&nbsp; ☺ Relationships
+    </div>
+
+    <div class="pill-row no-print" id="challengeWeekTabs" style="margin-bottom:18px;"></div>
+    <div id="challengeDays"></div>
+  </div>
+</section>
+<section id="homereset" class="page" style="--accent:var(--clay)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 09 · Weekly + as-needed · Resets each print</span>
+      <h1>Home Reset</h1>
+      <p class="page-sub">A 15-minute Sunday reset, a recurring daily/weekly/monthly/seasonal rotation, and a full deep clean day when you need one.</p>
+    </div>
+    <button class="print-btn no-print" data-print="homereset">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="card">
+      <h3>Sunday reset <span class="muted" style="font-weight:400;">(~15 minutes)</span></h3>
+      <ul class="checklist">
+        <li><input type="checkbox"><label>Confirm all bills due this week and which paycheck covers them</label></li>
+        <li><input type="checkbox"><label>Check Dom's and Daisy's schedules for the week</label></li>
+        <li><input type="checkbox"><label>Pick Friday takeout place (no 6pm negotiation)</label></li>
+        <li><input type="checkbox"><label>Do a 20-min clutter reset of the main living area</label></li>
+      </ul>
+      <div class="field" style="margin-top:14px;">
+        <label>Top 3 goals for the coming week</label>
+        <div class="pill-row" style="margin-bottom:10px;">
+          <span class="pill" style="cursor:default;">Catch up on mortgage arrears</span>
+          <span class="pill" style="cursor:default;">Attend therapy / psychiatry</span>
+          <span class="pill" style="cursor:default;">Complete 7 days sober</span>
+          <span class="pill" style="cursor:default;">Send one job application</span>
+          <span class="pill" style="cursor:default;">Do one deep clean room</span>
+          <span class="pill" style="cursor:default;">Plan and place grocery order</span>
+        </div>
+        <div class="field-row">
+          <input type="text" placeholder="1.">
+          <input type="text" placeholder="2.">
+          <input type="text" placeholder="3.">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Recurring cleaning rotation</div>
+    <div class="note-strip clay">These reset automatically — daily items clear each new day, weekly each new week, monthly each new month, and seasonal at the start of each season. No need to manually uncheck anything.</div>
+    <div class="grid-4">
+      <div class="card">
+        <h3 style="font-size:.85rem;">Daily</h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-store="clean_daily_dishes" id="clean_daily_dishes"><label for="clean_daily_dishes">Dishes done</label></li>
+          <li><input type="checkbox" data-store="clean_daily_counters" id="clean_daily_counters"><label for="clean_daily_counters">Counters wiped down</label></li>
+          <li><input type="checkbox" data-store="clean_daily_tidy" id="clean_daily_tidy"><label for="clean_daily_tidy">Quick tidy of main living area</label></li>
+          <li><input type="checkbox" data-store="clean_daily_beds" id="clean_daily_beds"><label for="clean_daily_beds">Beds made</label></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-size:.85rem;">Weekly</h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-store="clean_weekly_floors" id="clean_weekly_floors"><label for="clean_weekly_floors">Vacuum / sweep all floors</label></li>
+          <li><input type="checkbox" data-store="clean_weekly_bathrooms" id="clean_weekly_bathrooms"><label for="clean_weekly_bathrooms">Bathrooms cleaned</label></li>
+          <li><input type="checkbox" data-store="clean_weekly_laundry" id="clean_weekly_laundry"><label for="clean_weekly_laundry">Laundry washed &amp; put away</label></li>
+          <li><input type="checkbox" data-store="clean_weekly_sheets" id="clean_weekly_sheets"><label for="clean_weekly_sheets">Sheets changed</label></li>
+          <li><input type="checkbox" data-store="clean_weekly_trash" id="clean_weekly_trash"><label for="clean_weekly_trash">Trash &amp; recycling out</label></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-size:.85rem;">Monthly</h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-store="clean_monthly_dust" id="clean_monthly_dust"><label for="clean_monthly_dust">Dust surfaces &amp; baseboards</label></li>
+          <li><input type="checkbox" data-store="clean_monthly_fridge" id="clean_monthly_fridge"><label for="clean_monthly_fridge">Clean out the fridge</label></li>
+          <li><input type="checkbox" data-store="clean_monthly_cabinets" id="clean_monthly_cabinets"><label for="clean_monthly_cabinets">Wipe down kitchen cabinets</label></li>
+          <li><input type="checkbox" data-store="clean_monthly_declutter" id="clean_monthly_declutter"><label for="clean_monthly_declutter">Declutter one drawer/shelf</label></li>
+          <li><input type="checkbox" data-store="clean_monthly_windows" id="clean_monthly_windows"><label for="clean_monthly_windows">Clean interior windows</label></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-size:.85rem;">Seasonal</h3>
+        <ul class="checklist">
+          <li><input type="checkbox" data-store="clean_seasonal_windows" id="clean_seasonal_windows"><label for="clean_seasonal_windows">Deep clean windows in &amp; out</label></li>
+          <li><input type="checkbox" data-store="clean_seasonal_closet" id="clean_seasonal_closet"><label for="clean_seasonal_closet">Rotate seasonal clothing</label></li>
+          <li><input type="checkbox" data-store="clean_seasonal_filter" id="clean_seasonal_filter"><label for="clean_seasonal_filter">Replace HVAC/furnace filter</label></li>
+          <li><input type="checkbox" data-store="clean_seasonal_exterior" id="clean_seasonal_exterior"><label for="clean_seasonal_exterior">Clean gutters / exterior</label></li>
+          <li><input type="checkbox" data-store="clean_seasonal_garage" id="clean_seasonal_garage"><label for="clean_seasonal_garage">Declutter garage/storage</label></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-label">Deep clean day planner</div>
+    <div class="note-strip clay">Print one copy per cleaning day and date it. Start laundry in Block 34 so it runs while you finish the bedroom.</div>
+    <div class="card">
+      <div class="field"><label>Date of this cleaning session</label><input type="date" style="max-width:220px;"></div>
+    </div>
+    <div id="deepCleanRooms"></div>
+    <div class="card">
+      <h3>Completed items log</h3>
+      <p class="muted" style="margin-bottom:10px;">Saved on this device — builds automatically as you check off tasks above, so you can see what's been cleaned and when.</p>
+      <div id="deepCleanLog"></div>
+    </div>
+  </div>
+</section>
+<section id="mealplan" class="page" style="--accent:var(--clay)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 10 · Weekly · Resets each print</span>
+      <h1>Meal Plan</h1>
+      <p class="page-sub">Family of 4 · No seafood · Walmart delivery</p>
+    </div>
+    <button class="print-btn no-print" data-print="mealplan">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="card">
+      <h3>Week 1 — at a glance</h3>
+      <table class="ledger">
+        <tr><th>Day</th><th>Meal</th><th>Note</th></tr>
+        <tr><td class="label-cell">Mon</td><td class="label-cell">Sheet Pan Chicken Breasts</td><td class="label-cell">One pan, oven does the work</td></tr>
+        <tr><td class="label-cell">Tue</td><td class="label-cell">Slow Cooker Pulled Pork Sandwiches</td><td class="label-cell">Start before work</td></tr>
+        <tr><td class="label-cell">Wed</td><td class="label-cell">Spaghetti with Meat Sauce</td><td class="label-cell">20 minutes</td></tr>
+        <tr><td class="label-cell">Thu</td><td class="label-cell">Taco Night</td><td class="label-cell">Everyone builds their own</td></tr>
+        <tr><td class="label-cell">Fri</td><td class="label-cell">Planned Takeout</td><td class="label-cell">Pick the place on Sunday</td></tr>
+        <tr><td class="label-cell">Sat</td><td class="label-cell">Burgers</td><td class="label-cell">Ryan's night</td></tr>
+        <tr><td class="label-cell">Sun</td><td class="label-cell">Baked Ziti</td><td class="label-cell">One dish, feeds everyone</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>This week's plan</h3>
+      <table class="ledger">
+        <tr><th style="width:60px;">Day</th><th>Meal</th></tr>
+        <tr><td class="label-cell">Mon</td><td><input type="text" id="mealCur_mon"></td></tr>
+        <tr><td class="label-cell">Tue</td><td><input type="text" id="mealCur_tue"></td></tr>
+        <tr><td class="label-cell">Wed</td><td><input type="text" id="mealCur_wed"></td></tr>
+        <tr><td class="label-cell">Thu</td><td><input type="text" id="mealCur_thu"></td></tr>
+        <tr><td class="label-cell">Fri</td><td><input type="text" id="mealCur_fri"></td></tr>
+        <tr><td class="label-cell">Sat</td><td><input type="text" id="mealCur_sat"></td></tr>
+        <tr><td class="label-cell">Sun</td><td><input type="text" id="mealCur_sun"></td></tr>
+      </table>
+      <div class="field" style="margin-top:14px;"><label>Notes</label><textarea></textarea></div>
+    </div>
+
+    <div class="card">
+      <h3>Grocery list</h3>
+      <p class="muted">Add items before placing the Walmart delivery order.</p>
+      <textarea style="min-height:140px;" placeholder="One item per line..."></textarea>
+      <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400; color:var(--ink); margin-top:10px;"><input type="checkbox" style="width:16px;height:16px;"> Walmart order placed</label>
+    </div>
+
+    <div class="note-strip clay">
+      Friday takeout is a scheduled night off — not a failure. Ryan handles Saturday burgers. Fast food decision already made on Friday — no negotiating at 6pm.
+    </div>
+  </div>
+</section>
+<section id="purpose" class="page" style="--accent:var(--rose)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 11 · One-time setup + monthly · Saved on this device</span>
+      <h1>Purpose &amp; Vision</h1>
+      <p class="page-sub">Fill this out once. Come back to it when you need to remember why.</p>
+    </div>
+    <button class="print-btn no-print" data-print="purpose">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="card card-tinted" style="--tint:var(--gold-light);">
+      <span class="tag" style="background:var(--gold); color:var(--white);">Your Genius Type</span>
+      <h3 style="margin-top:10px;">Tempo — Senses Smart</h3>
+      <p class="muted" style="margin-bottom:10px;">Grounded · Caring · Great sense of timing · Perseverance · Thrives with support · Best at "When"</p>
+      <p class="quote-block" style="--accent:var(--gold);">You don't need to be first. You don't need the spotlight. You need the right support and the right timing — and you have both.</p>
+      <p class="muted">In good company: Nelson Mandela · Mother Teresa · Warren Buffett · Gandhi · Michael Phelps</p>
+    </div>
+
+    <div class="card">
+      <div class="field"><label>What I want my life to feel like in 1 year</label><textarea data-store="visionYear"></textarea></div>
+      <div class="field"><label>Three things that light me up</label>
+        <div class="field-row">
+          <input type="text" data-store="lightUp1">
+          <input type="text" data-store="lightUp2">
+          <input type="text" data-store="lightUp3">
+        </div>
+      </div>
+      <div class="field"><label>What I'm best at that other people notice</label><textarea data-store="bestAt"></textarea></div>
+      <div class="field"><label>One thing I want to be known for</label><textarea data-store="knownFor"></textarea></div>
+    </div>
+
+    <div class="card">
+      <h3>Values that resonate</h3>
+      <div class="pill-row" data-pillmulti="values">
+        <div class="pill" data-value="Family">Family</div>
+        <div class="pill" data-value="Stability">Stability</div>
+        <div class="pill" data-value="Freedom">Freedom</div>
+        <div class="pill" data-value="Creativity">Creativity</div>
+        <div class="pill" data-value="Honesty">Honesty</div>
+        <div class="pill" data-value="Loyalty">Loyalty</div>
+        <div class="pill" data-value="Peace">Peace</div>
+        <div class="pill" data-value="Growth">Growth</div>
+        <div class="pill" data-value="Connection">Connection</div>
+        <div class="pill" data-value="Humor">Humor</div>
+        <div class="pill" data-value="Health">Health</div>
+        <div class="pill" data-value="Safety">Safety</div>
+      </div>
+    </div>
+
+    <div class="card card-tinted" style="--tint:var(--rose-light);">
+      <h3>This month's reflection</h3>
+      <p class="quote-block" id="purposeMonthlyPrompt" style="--accent:var(--rose);"></p>
+      <textarea></textarea>
+    </div>
+  </div>
+</section>
+<section id="dates" class="page" style="--accent:var(--rose)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 12 · Updateable · Saved on this device</span>
+      <h1>Important Dates</h1>
+      <p class="page-sub">Birthdays and anniversaries, organized by month. Dates repeat annually.</p>
+    </div>
+    <button class="print-btn no-print" data-print="dates">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div id="datesMonths"></div>
+  </div>
+</section>
+<section id="gifts" class="page" style="--accent:var(--rose)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 13 · Updateable · Saved on this device</span>
+      <h1>Gift List</h1>
+      <p class="page-sub">One card per person. Check things off as you go.</p>
+    </div>
+    <button class="print-btn no-print" data-print="gifts">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div id="giftCards"></div>
+  </div>
+</section>
+<section id="contacts" class="page" style="--accent:var(--rose)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 14 · Updateable · Saved on this device</span>
+      <h1>Contact Cards</h1>
+      <p class="page-sub">Providers for the whole family. Add a new card any time.</p>
+    </div>
+    <button class="print-btn no-print" data-print="contacts">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div id="contactCards"></div>
+  </div>
+</section>
+<section id="sundayreview" class="page" style="--accent:var(--moss)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 15 · Weekly · Resets each print</span>
+      <h1>Weekly Sunday Review</h1>
+      <p class="page-sub">About 15 minutes. Save the printed page as that week's record.</p>
+    </div>
+    <button class="print-btn no-print" data-print="sundayreview">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="field" style="max-width:220px; margin-bottom:18px;"><label>Week of</label><input type="date" id="sundayWeekOf"></div>
+
+    <div class="card">
+      <h4>1. Bills this week</h4>
+      <p class="muted">Pulled live from Section 05 — Financial Center:</p>
+      <div id="sundayBillsPull" style="margin-bottom:12px;"></div>
+      <label>Anything else / surprises?</label>
+      <textarea></textarea>
+    </div>
+
+    <div class="card">
+      <h4>2. Appointments this week</h4>
+      <p class="muted">Pulled live from Section 14 — Contact Cards:</p>
+      <div id="sundayApptPull" style="margin-bottom:12px;"></div>
+      <ul class="checklist">
+        <li><input type="checkbox"><input type="text" placeholder="confirmed..." style="border:none; border-bottom:1px solid var(--line); border-radius:0; padding:4px 2px;"></li>
+        <li><input type="checkbox"><input type="text" placeholder="confirmed..." style="border:none; border-bottom:1px solid var(--line); border-radius:0; padding:4px 2px;"></li>
+        <li><input type="checkbox"><input type="text" placeholder="confirmed..." style="border:none; border-bottom:1px solid var(--line); border-radius:0; padding:4px 2px;"></li>
+        <li><input type="checkbox"><label>Nothing else this week</label></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h4>3. Meals this week</h4>
+      <p class="muted">Pulled live from Section 10 — Meal Plan:</p>
+      <div id="sundayMealsPull" style="margin-bottom:12px;"></div>
+      <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400; color:var(--ink);"><input type="checkbox" style="width:16px;height:16px;"> Walmart order placed</label>
+    </div>
+
+    <div class="card">
+      <h4>4. Connection this week</h4>
+      <div class="field"><label>Who did I reach out to this week?</label><textarea></textarea></div>
+      <div class="field"><label>Who do I want to reach out to next week?</label><textarea></textarea></div>
+    </div>
+
+    <div class="card">
+      <h4>5. Biggest stressor + one coping plan</h4>
+      <div class="field"><label>Name it</label><textarea></textarea></div>
+      <div class="field"><label>My plan for when it hits</label><textarea></textarea></div>
+    </div>
+
+    <div class="card">
+      <h4>Overall, this week felt...</h4>
+      <div class="pill-row" data-pillgroup-temp="weekRating">
+        <div class="pill" data-value="1">1 — Really hard</div>
+        <div class="pill" data-value="2">2</div>
+        <div class="pill" data-value="3">3 — Okay</div>
+        <div class="pill" data-value="4">4</div>
+        <div class="pill" data-value="5">5 — Pretty solid</div>
+      </div>
+    </div>
+
+    <div class="quote-block" style="--accent:var(--moss);">Reset doesn't mean perfect. It means ready. See you next Sunday.</div>
+  </div>
+</section>
+<section id="braindump" class="page" style="--accent:var(--rose)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 16 · As needed · Resets each print</span>
+      <h1>Brain Dump</h1>
+      <p class="page-sub">Get it out of your head and onto the page. No structure required.</p>
+    </div>
+    <button class="print-btn no-print" data-print="braindump">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="card">
+      <textarea style="min-height:640px; font-size:1rem; line-height:1.6;" placeholder="Dump it all here — thoughts, worries, to-dos, ideas, anything taking up space in your head right now..."></textarea>
+    </div>
+  </div>
+</section>
+<section id="appointments" class="page" style="--accent:var(--clay)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 17 · Ongoing · Saved on this device + synced</span>
+      <h1>Appointments &amp; Calendar Hub</h1>
+      <p class="page-sub">Medical, school, and family appointments — with prep notes and one-click calendar export.</p>
+    </div>
+    <button class="print-btn no-print" data-print="appointments">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="flex-between no-print" style="margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+      <p class="muted" style="margin:0;">Download a single appointment any time from its card, or grab everything upcoming at once — works with Google Calendar, Cozi, and most other calendar apps.</p>
+      <button class="small-btn" id="exportAllApptsBtn">⬇ Export all upcoming (.ics)</button>
+    </div>
+    <div id="apptCards"></div>
+  </div>
+</section>
+<section id="transportation" class="page" style="--accent:var(--clay)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 18 · Weekly + ongoing · Saved on this device + synced</span>
+      <h1>Transportation &amp; Logistics</h1>
+      <p class="page-sub">Who needs to be where this week, plus vehicle maintenance reminders.</p>
+    </div>
+    <button class="print-btn no-print" data-print="transportation">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="card">
+      <h3>This week's pickups &amp; drop-offs</h3>
+      <table class="ledger">
+        <tr><th style="width:60px;">Day</th><th>Who / where</th><th style="width:110px;">Time</th></tr>
+        <tr><td class="label-cell">Mon</td><td><input type="text" data-store="transWeek_mon"></td><td><input type="text" data-store="transWeekTime_mon"></td></tr>
+        <tr><td class="label-cell">Tue</td><td><input type="text" data-store="transWeek_tue"></td><td><input type="text" data-store="transWeekTime_tue"></td></tr>
+        <tr><td class="label-cell">Wed</td><td><input type="text" data-store="transWeek_wed"></td><td><input type="text" data-store="transWeekTime_wed"></td></tr>
+        <tr><td class="label-cell">Thu</td><td><input type="text" data-store="transWeek_thu"></td><td><input type="text" data-store="transWeekTime_thu"></td></tr>
+        <tr><td class="label-cell">Fri</td><td><input type="text" data-store="transWeek_fri"></td><td><input type="text" data-store="transWeekTime_fri"></td></tr>
+        <tr><td class="label-cell">Sat</td><td><input type="text" data-store="transWeek_sat"></td><td><input type="text" data-store="transWeekTime_sat"></td></tr>
+        <tr><td class="label-cell">Sun</td><td><input type="text" data-store="transWeek_sun"></td><td><input type="text" data-store="transWeekTime_sun"></td></tr>
+      </table>
+    </div>
+
+    <div class="section-label">Vehicle maintenance</div>
+    <div id="vehicleCards"></div>
+  </div>
+</section>
+<section id="supplies" class="page" style="--accent:var(--clay)">
+  <div class="page-header">
+    <div>
+      <span class="page-eyebrow">Section 19 · Ongoing · Saved on this device + synced</span>
+      <h1>Household Supplies &amp; Inventory</h1>
+      <p class="page-sub">What's running low — add it here before you're out, check it off once it's restocked.</p>
+    </div>
+    <button class="print-btn no-print" data-print="supplies">🖨 Print this page</button>
+  </div>
+
+  <div class="page-body">
+    <div class="card">
+      <div class="field-row no-print" style="align-items:flex-end;">
+        <div class="field" style="margin-bottom:0;"><label>Add an item</label><input type="text" id="newSupplyInput" placeholder="e.g., paper towels"></div>
+        <div class="field" style="margin-bottom:0; max-width:120px;"><button class="small-btn primary" id="addSupplyBtn" style="width:100%;">+ Add</button></div>
+      </div>
+      <ul class="checklist" id="supplyListHost" style="margin-top:14px;"></ul>
+      <button class="small-btn no-print" id="clearCheckedSuppliesBtn" style="margin-top:10px;">Clear checked items</button>
+    </div>
+  </div>
+</section>
+<!-- PAGE_SECTIONS -->
+  </main>
+
+</div>
+</div>
+
+<div class="save-pill no-print" id="savePill">Saved</div>
+
+<script>
+/* ============================================================
+   CORE DATA LAYER
+   ============================================================ */
+const STORE_KEY = 'shannonBinderData_v1';
+function loadStore(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveStore(){
+  localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  flashSaved();
+  if(window.__cloudSync) window.__cloudSync();
+}
+/* Explicit accessors so the Firebase auth/sync module (loaded separately) can
+   read or replace the whole store without relying on cross-script variable scoping. */
+function getStoreSnapshot(){ return store; }
+function setStoreSnapshot(data){ store = data || {}; }
+let store = loadStore();
+let saveTimer=null;
+function flashSaved(){
+  const pill = document.getElementById('savePill');
+  if(!pill) return;
+  pill.classList.add('show');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>pill.classList.remove('show'), 1100);
+}
+
+/* Generic binding for simple fields: data-store="key" */
+function bindPersistentFields(root){
+  root.querySelectorAll('[data-store]').forEach(el=>{
+    const key = el.dataset.store;
+    if(el.type==='checkbox'){
+      el.checked = !!store[key];
+      el.addEventListener('change', ()=>{ store[key]=el.checked; saveStore(); el.dispatchEvent(new CustomEvent('storedchange',{bubbles:true})); });
+    } else {
+      if(store[key]!==undefined && store[key]!==null) el.value = store[key];
+      const evt = (el.tagName==='SELECT' || el.type==='date') ? 'change' : 'input';
+      el.addEventListener(evt, ()=>{ store[key]=el.value; saveStore(); el.dispatchEvent(new CustomEvent('storedchange',{bubbles:true})); });
+    }
+  });
+}
+
+/* Generic pill (single-select toggle group): data-pillgroup + data-value, stores selected value under data-store key on the group wrapper */
+function bindPillGroups(root){
+  root.querySelectorAll('[data-pillgroup]').forEach(group=>{
+    const key = group.dataset.pillgroup;
+    const opts = group.querySelectorAll('.pill, .mood-opt');
+    function paint(){
+      const val = store[key];
+      opts.forEach(o=> o.classList.toggle('active', o.dataset.value===val));
+    }
+    opts.forEach(o=>{
+      o.addEventListener('click', ()=>{
+        store[key] = (store[key]===o.dataset.value) ? undefined : o.dataset.value;
+        saveStore(); paint();
+      });
+    });
+    paint();
+  });
+}
+
+/* Multi-select pill groups (values pill): data-pillmulti="key" stores array */
+function bindMultiPillGroups(root){
+  root.querySelectorAll('[data-pillmulti]').forEach(group=>{
+    const key = group.dataset.pillmulti;
+    if(!Array.isArray(store[key])) store[key]=[];
+    const opts = group.querySelectorAll('.pill');
+    function paint(){ opts.forEach(o=> o.classList.toggle('active', store[key].includes(o.dataset.value))); }
+    opts.forEach(o=>{
+      o.addEventListener('click', ()=>{
+        const v=o.dataset.value;
+        const i=store[key].indexOf(v);
+        if(i>-1) store[key].splice(i,1); else store[key].push(v);
+        saveStore(); paint();
+      });
+    });
+    paint();
+  });
+}
+
+/* Ephemeral single-select pill groups — NOT persisted, resets on reload (used for moods, week rating, pen tool) */
+const tempPillState = {};
+function bindTempPillGroups(root){
+  root.querySelectorAll('[data-pillgroup-temp]').forEach(group=>{
+    const key = group.dataset['pillgroupTemp'] || group.getAttribute('data-pillgroup-temp');
+    const opts = group.querySelectorAll('.pill, .mood-opt');
+    const preActive = group.querySelector('.pill.active, .mood-opt.active');
+    tempPillState[key] = preActive ? preActive.dataset.value : undefined;
+    opts.forEach(o=>{
+      o.addEventListener('click', ()=>{
+        tempPillState[key] = (tempPillState[key]===o.dataset.value) ? undefined : o.dataset.value;
+        opts.forEach(x=>x.classList.toggle('active', x.dataset.value===tempPillState[key]));
+      });
+    });
+  });
+}
+function getTempPill(key){ return tempPillState[key]; }
+
+/* Generic "Other" reveal: any <select data-other-target="inputId"> shows/hides the
+   referenced text input depending on whether "Other" is selected. Used by the
+   coping-tool dropdown and the gift-card person dropdown. */
+function bindOtherTriggers(root){
+  root.querySelectorAll('[data-other-target]').forEach(sel=>{
+    const target = document.getElementById(sel.getAttribute('data-other-target'));
+    if(!target) return;
+    const sync = ()=>{ target.style.display = (sel.value==='Other') ? '' : 'none'; };
+    sel.addEventListener('change', sync);
+    sync();
+  });
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id===id));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.target===id));
+  window.scrollTo(0,0);
+  store.__lastPage = id; saveStore();
+  if(id==='sundayreview' && typeof renderSundayPulls==='function') renderSundayPulls();
+}
+
+/* ============================================================
+   PRINT (per-section)
+   ============================================================ */
+function printSection(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('print-target'));
+  const el = document.getElementById(id);
+  if(el){
+    el.classList.add('print-target');
+    // Force every collapsible <details> open so print reflects the actual current
+    // data (every month / every block), not just whatever happens to be expanded
+    // on screen. Restored after the print dialog closes.
+    const detailsList = el.querySelectorAll('details');
+    detailsList.forEach(d=>{ d.dataset.wasOpen = d.open ? '1' : '0'; d.open = true; });
+    window.__printRestoreDetails = detailsList;
+  }
+  document.body.classList.add('printing-section');
+  window.print();
+}
+window.addEventListener('afterprint', ()=>{
+  document.body.classList.remove('printing-section');
+  if(window.__printRestoreDetails){
+    window.__printRestoreDetails.forEach(d=>{ d.open = (d.dataset.wasOpen==='1'); });
+    window.__printRestoreDetails = null;
+  }
+});
+
+/* ============================================================
+   DATE / DAY HELPERS
+   ============================================================ */
+const DAY_MS = 86400000;
+function dateOnly(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function daysBetween(a,b){ return Math.round((dateOnly(b)-dateOnly(a))/DAY_MS); }
+function fmtDate(d){ return d.toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric', year:'numeric'}); }
+
+/* ============================================================
+   AFFIRMATIONS (rotate by day-of-year, used on Dashboard)
+   ============================================================ */
+const AFFIRMATIONS = [
+  "You don't have to be ready. You just have to begin.",
+  "Small actions, done daily, change everything.",
+  "Connection is courage. One message counts.",
+  "Your space shapes your mind. Protect both.",
+  "Reset doesn't mean perfect. It means ready.",
+  "Every application is a vote for the future you want.",
+  "One week in. You showed up. That matters.",
+  "A cleaner digital space leads to a clearer mind.",
+  "You don't have to carry it alone anymore.",
+  "Done is better than perfect.",
+  "The right people don't need convincing.",
+  "Numbers don't define you. They're just information.",
+  "Purpose isn't found. It's practiced.",
+  "Two weeks of showing up. You're building something.",
+  "Money is a tool. You're learning to hold it steady.",
+  "Momentum is built, not found.",
+  "Rest is not a reward. It's a requirement.",
+  "Same reset, steadier hands.",
+  "Three weeks. The roots are taking hold.",
+  "You're catching up. That's not behind — that's healing.",
+  "Small spaces, cleared one block at a time.",
+  "Gratitude doesn't erase hard. It balances it.",
+  "One more day. You've done this before.",
+  "You did this. What's next?",
+  "Grounded beats fast. You move at the right tempo.",
+  "Timing is a skill. You're getting better at it.",
+  "Perseverance looks like showing up on the ordinary days.",
+  "You don't need a perfect day. You need a started one.",
+  "The plan only has to work today. Today's the only day you have to run it.",
+  "Steady is its own kind of strong."
+];
+
+/* ============================================================
+   PAYCHECK PLANNER — auto-regenerating based on real pay schedule
+   Edit INCOME_SOURCES below if a pay schedule or amount changes.
+   Bills are NOT auto-filled (your bill list varies week to week) —
+   each generated check has a free-text area for that, same as before.
+   ============================================================ */
+function nthWeekdayOfMonth(year, month, weekday, n){
+  // weekday: 0=Sun..6=Sat. Returns the nth occurrence of that weekday in the given month.
+  let d = new Date(year, month, 1);
+  let count = 0;
+  while(d.getMonth()===month){
+    if(d.getDay()===weekday){ count++; if(count===n) return new Date(d); }
+    d = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1);
+  }
+  return null;
+}
+function biweeklyDates(anchor, from, count){
+  let d = new Date(anchor);
+  while(d < from) d = new Date(d.getTime() + 14*DAY_MS);
+  const out=[]; while(out.length<count){ out.push(new Date(d)); d = new Date(d.getTime()+14*DAY_MS); } return out;
+}
+function weeklyDates(anchor, from, count){
+  let d = new Date(anchor);
+  while(d < from) d = new Date(d.getTime() + 7*DAY_MS);
+  const out=[]; while(out.length<count){ out.push(new Date(d)); d = new Date(d.getTime()+7*DAY_MS); } return out;
+}
+function monthlyDates(anchor, getDateForMonth, from, count){
+  const out=[];
+  let y = from.getFullYear(), m = from.getMonth();
+  // start a month early in case this month's date already passed
+  m -= 1; if(m<0){ m=11; y-=1; }
+  while(out.length<count){
+    const d = getDateForMonth(y,m);
+    if(d && d>=anchor && d>=from) out.push(d);
+    m++; if(m>11){ m=0; y++; }
+  }
+  return out;
+}
+const INCOME_SOURCES = [
+  { key:'shannon', label:"Shannon's check", amount:1300,
+    dates:(from,count)=> biweeklyDates(new Date(2026,5,17), from, count) },
+  { key:'ryan', label:"Ryan's check", amount:250,
+    dates:(from,count)=> weeklyDates(new Date(2026,5,18), from, count) }, // Thursday
+  { key:'ssi', label:'SSI', amount:null,
+    dates:(from,count)=> monthlyDates(new Date(2026,6,10), (y,m)=>{
+      const wed2 = nthWeekdayOfMonth(y,m,3,2); // 2nd Wednesday
+      return wed2 ? new Date(wed2.getFullYear(),wed2.getMonth(),wed2.getDate()+2) : null; // Friday after
+    }, from, count) },
+  { key:'chuck', label:"Chuck's check", amount:900,
+    dates:(from,count)=> monthlyDates(new Date(2026,5,1), (y,m)=> new Date(y,m,20), from, count) } // floats ~20th, estimate
+];
+function getUpcomingPaychecks(weeksAhead, fromDate){
+  const from = dateOnly(fromDate || new Date());
+  const horizon = new Date(from.getTime() + weeksAhead*7*DAY_MS);
+  let all = [];
+  INCOME_SOURCES.forEach(src=>{
+    src.dates(from, 6).forEach(d=>{ if(d<=horizon) all.push({date:d, key:src.key, label:src.label, amount:src.amount}); });
+  });
+  all.sort((a,b)=>a.date-b.date);
+  return all;
+}
+function renderPaydayPlan(){
+  const host = document.getElementById('paydayPlanHost');
+  if(!host) return;
+  const checks = getUpcomingPaychecks(4);
+  host.innerHTML = checks.map(c=>(
+    '<div class="card">'+
+      '<h4>'+c.date.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})+' — '+c.label+
+        (c.amount ? ' <span class="mono muted">(~$'+c.amount.toLocaleString()+')</span>' : ' <span class="mono muted">(amount varies)</span>')+
+      '</h4>'+
+      '<div class="field" style="margin-bottom:0;"><label>Bills / allocations for this check</label><textarea placeholder="List what\'s coming out of this check..."></textarea></div>'+
+    '</div>'
+  )).join('');
+}
+
+/* ============================================================
+   DEBT TRACKERS (savings-tracker style) — shared between Financial Center + Dashboard
+   ============================================================ */
+const DEBTS = [
+  { key:'mortgage', label:'Mortgage Arrears', target:1356 },
+  { key:'consumers', label:'Consumers Energy', target:502.93 },
+  { key:'ortho', label:'Orthodontist', target:400 },
+  { key:'sparrow', label:'Sparrow Credit Card', target:336.96, note:'⚠️ Ask attorney first — opened after bankruptcy filing, likely not covered. Do not pay without asking your attorney first.' }
+];
+function renderDebtTrackers(){
+  const host = document.getElementById('finDebtTrackers');
+  if(host){
+    host.innerHTML = DEBTS.map(d=>(
+      '<div class="card">'+
+        '<div class="flex-between" style="margin-bottom:8px; flex-wrap:wrap; gap:8px;">'+
+          '<h4 style="margin:0;">'+d.label+'</h4>'+
+          '<div style="display:flex; align-items:center; gap:6px;">'+
+            '<span class="mono muted">$</span>'+
+            '<input type="number" data-store="paid_'+d.key+'" id="paid_'+d.key+'" style="width:110px;" placeholder="0">'+
+            '<span class="muted mono">paid / $'+d.target.toLocaleString()+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<div class="progress-track"><div class="progress-fill" id="debt-bar-'+d.key+'" style="width:0%"></div></div>'+
+        (d.note ? '<p class="muted" style="margin-top:8px;">'+d.note+'</p>' : '')+
+      '</div>'
+    )).join('');
+    bindPersistentFields(host);
+    DEBTS.forEach(d=>{
+      document.getElementById('paid_'+d.key).addEventListener('input', renderDebtBars);
+    });
+  }
+  renderDebtBars();
+}
+function renderDebtBars(){
+  DEBTS.forEach(d=>{
+    const v = parseFloat(store['paid_'+d.key]) || 0;
+    const pct = Math.min(100, Math.round((v/d.target)*100));
+    const finBar = document.getElementById('debt-bar-'+d.key);
+    const dashBar = document.getElementById('dash-debt-bar-'+d.key);
+    if(finBar) finBar.style.width = pct+'%';
+    if(dashBar){
+      dashBar.style.width = pct+'%';
+      const row = dashBar.closest('.field');
+      if(row){ const amt = row.querySelector('.dash-debt-amt'); if(amt) amt.textContent = '$'+v.toLocaleString()+' / $'+d.target.toLocaleString(); }
+    }
+  });
+}
+
+/* ============================================================
+   OTHER MILESTONE BARS — Lawyer + Savings-started (not part of the debt ledger)
+   ============================================================ */
+const MILESTONE_PCT = { urgent:5, plan:35, norush:20, warn:10, progress:55, done:100 };
+function pctFor(val){ return MILESTONE_PCT[val] !== undefined ? MILESTONE_PCT[val] : 5; }
+function renderMilestoneBars(){
+  const map = {
+    lawyer: store.lawyerStatus || 'progress',
+    savings: store.status_savings || 'urgent'
+  };
+  Object.keys(map).forEach(key=>{
+    const pct = pctFor(map[key]);
+    const finBar = document.getElementById('fin-bar-'+key);
+    const dashBar = document.getElementById('dash-bar-'+key);
+    if(finBar) finBar.style.width = pct+'%';
+    if(dashBar) dashBar.style.width = pct+'%';
+  });
+}
+function initFinancial(){
+  renderMilestoneBars();
+  renderDebtTrackers();
+  renderPaydayPlan();
+  const regenBtn = document.getElementById('regenPaydayBtn');
+  if(regenBtn) regenBtn.addEventListener('click', renderPaydayPlan);
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+const CHALLENGE_START = new Date(2026,5,17); // June 17, 2026
+
+function dayOfYear(d){
+  const start = new Date(d.getFullYear(),0,0);
+  return Math.floor((d - start)/DAY_MS);
+}
+function initDashboard(){
+  const today = new Date();
+  document.getElementById('dashTodayDate').textContent = fmtDate(today);
+
+  const dayNum = daysBetween(CHALLENGE_START, today) + 1;
+  const challengeEl = document.getElementById('dashChallengeDay');
+  const themeEl = document.getElementById('dashTheme');
+  if(dayNum >= 1 && dayNum <= 30 && typeof DAYS !== 'undefined'){
+    const d = DAYS[dayNum-1];
+    challengeEl.textContent = '30-Day Rebuild — Day '+dayNum+' of 30';
+    themeEl.textContent = d ? d.theme : '';
+  } else if(dayNum > 30){
+    challengeEl.textContent = '30-Day Rebuild — complete!';
+    themeEl.textContent = 'Whatever comes next, you already proved you can show up.';
+  } else {
+    challengeEl.textContent = '30-Day Rebuild begins June 17, 2026';
+    themeEl.textContent = '';
+  }
+
+  document.getElementById('dashAffirmation').textContent = AFFIRMATIONS[dayOfYear(today) % AFFIRMATIONS.length];
+
+  // Financial milestones — one card per debt (read-only mirror) + total saved
+  const milestoneHost = document.getElementById('dashMilestones');
+  let mh = DEBTS.map(d=>(
+    '<div class="field" style="margin-bottom:10px;">'+
+      '<div class="progress-row"><span>'+d.label+'</span><span class="mono muted dash-debt-amt">$0 / $'+d.target.toLocaleString()+'</span></div>'+
+      '<div class="progress-track"><div class="progress-fill" id="dash-debt-bar-'+d.key+'" style="width:0%"></div></div>'+
+    '</div>'
+  )).join('');
+  const savedTotal = SAVINGS_GOALS.reduce((sum,g)=> sum + (parseFloat(store[g.key])||0), 0);
+  const savedTarget = SAVINGS_GOALS.reduce((sum,g)=> sum + g.target, 0);
+  const savedPct = Math.min(100, Math.round((savedTotal/savedTarget)*100));
+  mh += '<div class="field" style="margin-bottom:0;">'+
+    '<div class="progress-row"><span><strong>Total saved</strong></span><span class="mono muted">$'+savedTotal.toLocaleString()+' / $'+savedTarget.toLocaleString()+'</span></div>'+
+    '<div class="progress-track"><div class="progress-fill" id="dash-bar-totalsaved" style="width:'+savedPct+'%"></div></div>'+
+  '</div>';
+  milestoneHost.innerHTML = mh;
+  renderDebtBars();
+  renderMilestoneBars();
+
+  // Sobriety streak (mirrors Section 3)
+  renderSobrietyStreak('dashStreakNum');
+}
+
+function initCheckin(){ /* fully ephemeral — no init needed beyond generic bindings */ }
+
+
+/* ============================================================
+   SAVINGS GOALS
+   ============================================================ */
+const SAVINGS_GOALS = [
+  { key:'goalEmergency', label:'Emergency Fund', target:1000 },
+  { key:'goalDaisy', label:"Daisy's Car Fund", target:1000 },
+  { key:'goalDominik', label:"Dominik's Car Fund", target:1000 },
+  { key:'goalGift', label:'Gift / Holiday Fund', target:4000 },
+  { key:'goal3mo', label:'3-Month Expense Fund', target:20000 }
+];
+function initSavings(){
+  const host = document.getElementById('savingsGoals');
+  host.innerHTML = SAVINGS_GOALS.map(g=>(
+    '<div class="card">'+
+      '<div class="flex-between" style="margin-bottom:8px;">'+
+        '<h4 style="margin:0;">'+g.label+'</h4>'+
+        '<div style="display:flex; align-items:center; gap:6px;">'+
+          '<span class="mono muted">$</span>'+
+          '<input type="number" data-store="'+g.key+'" id="'+g.key+'" style="width:110px;" placeholder="0">'+
+          '<span class="muted mono">/ $'+g.target.toLocaleString()+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="progress-track"><div class="progress-fill" id="bar-'+g.key+'" style="width:0%"></div></div>'+
+    '</div>'
+  )).join('');
+  bindPersistentFields(host);
+  SAVINGS_GOALS.forEach(g=>{
+    document.getElementById(g.key).addEventListener('input', renderSavingsTotals);
+  });
+  renderSavingsTotals();
+}
+function renderSavingsTotals(){
+  let total = 0;
+  SAVINGS_GOALS.forEach(g=>{
+    const v = parseFloat(store[g.key]) || 0;
+    total += v;
+    const pct = Math.min(100, Math.round((v/g.target)*100));
+    const bar = document.getElementById('bar-'+g.key);
+    if(bar) bar.style.width = pct+'%';
+  });
+  const totalEl = document.getElementById('savingsTotal');
+  if(totalEl) totalEl.textContent = '$'+total.toLocaleString();
+}
+
+/* ============================================================
+   AFTER BANKRUPTCY — open accounts CRUD
+   ============================================================ */
+function initBankruptcy(){
+  if(!Array.isArray(store.accounts)) store.accounts = [];
+  renderAccountsTable();
+  document.getElementById('addAccountBtn').addEventListener('click', ()=>{
+    store.accounts.push({ id:Date.now(), name:'', type:'', opened:'', balance:'', status:'open' });
+    saveStore();
+    renderAccountsTable();
+  });
+  initCreditTracker();
+}
+function initCreditTracker(){
+  document.getElementById('addCreditBtn').addEventListener('click', ()=>{
+    const dateEl = document.getElementById('creditCheckDate');
+    const scoreEl = document.getElementById('creditScoreInput');
+    const date = dateEl.value, score = parseFloat(scoreEl.value);
+    if(!date || !score) return;
+    if(!Array.isArray(store.creditHistory)) store.creditHistory = [];
+    store.creditHistory.push({ date, score });
+    store.creditHistory.sort((a,b)=> new Date(a.date) - new Date(b.date));
+    saveStore();
+    dateEl.value=''; scoreEl.value='';
+    renderCreditTracker();
+  });
+  renderCreditTracker();
+}
+function renderCreditTracker(){
+  if(!Array.isArray(store.creditHistory)) store.creditHistory = [];
+  const entries = store.creditHistory;
+  const graphHost = document.getElementById('creditGraphHost');
+  if(entries.length < 2){
+    graphHost.innerHTML = '<p class="muted">Add at least two months to see your trend line.</p>';
+  } else {
+    const w=600, h=180, pad=32;
+    const scores = entries.map(e=>e.score);
+    const min = Math.min(...scores)-10, max = Math.max(...scores)+10;
+    const xStep = (w-2*pad)/(entries.length-1);
+    const pts = entries.map((e,i)=>{
+      const x = pad + i*xStep;
+      const y = (h-pad) - ((e.score-min)/(max-min))*(h-2*pad);
+      return [x,y];
+    });
+    const path = pts.map((p,i)=> (i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+    const dots = pts.map((p,i)=>'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="4" fill="var(--slate)"></circle><text x="'+p[0].toFixed(1)+'" y="'+(p[1]-10).toFixed(1)+'" font-size="10" text-anchor="middle" fill="var(--ink)">'+entries[i].score+'</text>').join('');
+    const labels = entries.map((e,i)=>'<text x="'+pts[i][0].toFixed(1)+'" y="'+(h-8)+'" font-size="9" text-anchor="middle" fill="var(--ink-soft)">'+e.date.slice(5)+'</text>').join('');
+    graphHost.innerHTML = '<svg viewBox="0 0 '+w+' '+h+'" style="width:100%; max-width:600px; height:auto; display:block;">'+
+      '<path d="'+path+'" fill="none" stroke="var(--slate)" stroke-width="2"></path>'+dots+labels+
+    '</svg>';
+  }
+  const listHost = document.getElementById('creditHistoryList');
+  listHost.innerHTML = entries.slice().reverse().map((e)=>{
+    const i = entries.indexOf(e);
+    return '<div class="flex-between" style="padding:4px 0; border-bottom:1px solid var(--line); font-size:.85rem;">'+
+      '<span class="mono">'+e.date+' — '+e.score+'</span>'+
+      '<button class="small-btn no-print" data-del-credit="'+i+'" style="padding:2px 8px; font-size:.7rem;">✕</button>'+
+    '</div>';
+  }).join('');
+  listHost.querySelectorAll('[data-del-credit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = parseInt(btn.dataset.delCredit,10);
+      store.creditHistory.splice(i,1); saveStore(); renderCreditTracker();
+    });
+  });
+}
+function renderAccountsTable(){
+  const table = document.getElementById('accountsTable');
+  const rows = store.accounts.map(acc=>(
+    '<tr data-id="'+acc.id+'">'+
+      '<td class="label-cell"><input type="text" value="'+(acc.name||'').replace(/"/g,'&quot;')+'" data-field="name" style="font-family:inherit;"></td>'+
+      '<td><input type="text" value="'+(acc.type||'').replace(/"/g,'&quot;')+'" data-field="type" placeholder="secured card..." style="font-family:inherit;"></td>'+
+      '<td><input type="date" value="'+(acc.opened||'')+'" data-field="opened"></td>'+
+      '<td><input type="text" value="'+(acc.balance||'').replace(/"/g,'&quot;')+'" data-field="balance" placeholder="$0" style="font-family:inherit; width:80px;"></td>'+
+      '<td><select data-field="status"><option value="open"'+(acc.status==='open'?' selected':'')+'>Open</option><option value="closed"'+(acc.status==='closed'?' selected':'')+'>Closed</option></select></td>'+
+      '<td class="no-print"><button class="small-btn danger" data-del="'+acc.id+'">✕</button></td>'+
+    '</tr>'
+  )).join('');
+  table.innerHTML = '<tr><th>Account</th><th>Type</th><th>Opened</th><th>Balance</th><th>Status</th><th class="no-print"></th></tr>' + rows;
+
+  table.querySelectorAll('input,select').forEach(input=>{
+    input.addEventListener(input.tagName==='SELECT'?'change':'input', e=>{
+      const tr = e.target.closest('tr');
+      const id = Number(tr.dataset.id);
+      const acc = store.accounts.find(a=>a.id===id);
+      if(acc){ acc[e.target.dataset.field] = e.target.value; saveStore(); }
+    });
+  });
+  table.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = Number(btn.dataset.del);
+      store.accounts = store.accounts.filter(a=>a.id!==id);
+      saveStore();
+      renderAccountsTable();
+    });
+  });
+}
+
+/* ============================================================
+   SOBRIETY & COPING
+   ============================================================ */
+function getSobrietyStart(){
+  if(store.sobrietyStart){
+    const parts = store.sobrietyStart.split('-').map(Number);
+    return new Date(parts[0], parts[1]-1, parts[2]);
+  }
+  return new Date(2026,5,1); // default June 1, 2026
+}
+function renderSobrietyStreak(targetId){
+  const el = document.getElementById(targetId);
+  if(!el) return;
+  const start = getSobrietyStart();
+  const today = new Date();
+  const n = Math.max(0, daysBetween(start, today) + 1);
+  el.textContent = n;
+}
+function initSobriety(){
+  if(!store.sobrietyStart){
+    const d = new Date(2026,5,1);
+    store.sobrietyStart = d.toISOString().slice(0,10);
+    saveStore();
+  }
+  document.getElementById('sobrietyStartInput').value = store.sobrietyStart;
+  renderSobrietyStreak('sobStreakNum');
+
+  document.getElementById('sobrietyStartInput').addEventListener('change', ()=>{
+    renderSobrietyStreak('sobStreakNum');
+  });
+
+  document.getElementById('restartSobBtn').addEventListener('click', ()=>{
+    const today = new Date().toISOString().slice(0,10);
+    store.sobrietyStart = today;
+    document.getElementById('sobrietyStartInput').value = today;
+    store.sobrietyGrid = [];
+    saveStore();
+    renderSobrietyStreak('sobStreakNum');
+    renderSobrietyGrid();
+  });
+
+  renderSobrietyGrid();
+}
+function renderSobrietyGrid(){
+  const host = document.getElementById('sobGrid');
+  if(!host) return;
+  if(!Array.isArray(store.sobrietyGrid)) store.sobrietyGrid = new Array(100).fill('');
+  host.innerHTML = '';
+  for(let i=0;i<100;i++){
+    const cell = document.createElement('div');
+    const state = store.sobrietyGrid[i] || '';
+    cell.textContent = i+1;
+    cell.style.cssText = 'aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:.65rem; border-radius:5px; cursor:pointer; border:1px solid var(--line); user-select:none;';
+    if(state==='sober'){ cell.style.background='#16D223'; cell.style.color='var(--white)'; cell.style.borderColor='#16D223'; }
+    else if(state==='reset'){ cell.style.background='#FF1717'; cell.style.color='var(--white)'; cell.style.borderColor='#FF1717'; }
+    else { cell.style.background='var(--white)'; cell.style.color='var(--ink-soft)'; }
+    cell.addEventListener('click', ()=>{
+      const mode = getTempPill('sobPenMode') || 'sober';
+      store.sobrietyGrid[i] = (store.sobrietyGrid[i]===mode) ? '' : mode;
+      saveStore();
+      renderSobrietyGrid();
+    });
+    host.appendChild(cell);
+  }
+}
+
+
+
+/* ============================================================
+   30-DAY LIFE REBUILD — full content + renderer
+   ============================================================ */
+const DAYS = [
+  { theme:'Launch Day', week:1, tasks:['Pick the ONE room that stresses you most — 20-min clutter reset','Send one message to a long-term friend','Write 3 sentences: "What I want my life to feel like is..."'], quote:'You don\'t have to be ready. You just have to begin.' },
+  { theme:'Build the Habit', week:1, tasks:['Use one coping tool (journal, breathe, walk, call someone)','Unsubscribe from 10 junk emails','At 9pm: write tomorrow\'s Top 3'], quote:'Small actions, done daily, change everything.' },
+  { theme:'Connect', week:1, tasks:['Reach out to one person — friend, family, or online community','Do a 20-min evening home reset','Name one thing you\'re looking forward to next week'], quote:'Connection is courage. One message counts.' },
+  { theme:'Environment Focus', week:1, tasks:['Deep clean or declutter one space — pick one room','Take a 15-minute walk or step outside','Unsubscribe from 10 more junk emails','Reflect: what felt easier this week than last week?'], quote:'Your space shapes your mind. Protect both.' },
+  { theme:'Sunday Reset', week:1, tasks:['Complete the Home Reset Sunday checklist (Section 09)','Write Top 3 goals for the coming week','Review therapy/psychiatry appointments — confirm or schedule','Plan meals for the week','Name your biggest stressor + write one coping plan for it'], quote:'Reset doesn\'t mean perfect. It means ready.' },
+  { theme:'Job Search Monday', week:1, tasks:['Send or prepare 1 job application','Review budget/bills per the Financial Command Center'], quote:'Every application is a vote for the future you want.' },
+  { theme:'Week 1 Reflection', week:1, milestone:7, tasks:['Reflect: what went well this week? What was hardest?','Name 3 things that light you up','Do a 20-min home reset','Send one appreciative message to someone in your life'], quote:'One week in. You showed up. That matters.' },
+  { theme:'Digital Clean-Up', week:2, tasks:['Unsubscribe from 10 junk emails','Organize one folder or inbox — delete or file 20 items','Use your AI planning tool for today\'s Top 3'], quote:'A cleaner digital space leads to a clearer mind.' },
+  { theme:'Therapy Prep', week:2, tasks:['Journal: name one emotional trigger from this week to bring to therapy','Confirm or attend your therapy appointment','Use one coping tool'], quote:'You don\'t have to carry it alone anymore.' },
+  { theme:'Productivity Reset', week:2, tasks:['One 25-minute focused work block — one task, timer, no interruptions','Cross off one task and say "done" out loud','Tidy one small surface (desk, counter, table)'], quote:'Done is better than perfect.' },
+  { theme:'Relationships', week:2, tasks:['Reach out to one person you\'ve been meaning to talk to','Write one sentence about a relationship you want to nurture','Do a 20-min home reset'], quote:'The right people don\'t need convincing.' },
+  { theme:'Money Check-In', week:2, tasks:['Review the Financial Command Center for this week\'s payments','Name one thing that feels lighter financially than last week','Use one coping tool if money stress shows up'], quote:'Numbers don\'t define you. They\'re just information.' },
+  { theme:'Purpose Practice', week:2, tasks:['Revisit your "what I want my life to feel like" sentence from Day 1','Name one value that matters to you right now','Step outside for 15 minutes'], quote:'Purpose isn\'t found. It\'s practiced.' },
+  { theme:'Week 2 Reflection', week:2, milestone:14, tasks:['Reflect: what\'s gotten a little easier since Day 1?','Name one thing you no longer worry about as much','Send an appreciative message to someone','Do a 20-min home reset'], quote:'Two weeks of showing up. You\'re building something.' },
+  { theme:'Payday + Purpose', week:3, tasks:['Review the Financial Command Center for today\'s payments','Revisit your Day 1 sentence — has anything shifted?','Name one thing you\'re proud of this month'], quote:'Money is a tool. You\'re learning to hold it steady.' },
+  { theme:'Connect', week:3, tasks:['Reach out to someone you\'ve been meaning to talk to','Do a 20-min home reset','Write one sentence about a relationship you want to nurture'], quote:'Connection is courage. One message still counts.' },
+  { theme:'Productivity', week:3, tasks:['One 25-minute focused work block','Send or prepare one job search task','Celebrate one completed task out loud'], quote:'Momentum is built, not found.' },
+  { theme:'Rest + Recharge', week:3, tasks:['Take time for something that genuinely rests you','Step outside','Name one thing you\'re grateful for today'], quote:'Rest is not a reward. It\'s a requirement.' },
+  { theme:'Sunday Reset', week:3, tasks:['Complete the Home Reset Sunday checklist','Write Top 3 goals for the week','Review therapy/psychiatry appointments','Plan meals for the week','Name your biggest stressor + one coping plan'], quote:'Same reset, steadier hands.' },
+  { theme:'Job Search Monday', week:3, tasks:['Send or prepare 1 job application','Review budget/bills per the Command Center'], quote:'Every application is a vote for the future you want.' },
+  { theme:'Week 3 Reflection', week:3, milestone:21, tasks:['Reflect on what\'s gotten easier','Name one thing you no longer worry about','Do a 20-min home reset','Send an appreciative message'], quote:'Three weeks. The roots are taking hold.' },
+  { theme:'Mortgage Check-In', week:4, tasks:['Review mortgage arrears progress on the Financial Command Center','Use one coping tool','Name one thing that feels lighter financially'], quote:'You\'re catching up. That\'s not behind — that\'s healing.' },
+  { theme:'Digital + Deep Clean', week:4, tasks:['Unsubscribe from 10 junk emails','Pick one Deep Clean room or block to tackle','At 9pm: write tomorrow\'s Top 3'], quote:'Small spaces, cleared one block at a time.' },
+  { theme:'Connect', week:4, tasks:['Reach out to one person','Do a 20-min home reset','Name one thing you\'re looking forward to'], quote:'Connection is courage. One message still counts.' },
+  { theme:'Purpose Check-In', week:4, tasks:['Revisit your Purpose & Vision page','Add or update one value that resonates','Step outside for 15 minutes'], quote:'Purpose isn\'t found. It\'s practiced.' },
+  { theme:'Sunday Reset', week:4, tasks:['Complete the Home Reset Sunday checklist','Write Top 3 goals for the week','Review appointments','Plan meals for the week','Name your stressor + one coping plan'], quote:'One more reset. One more ready week.' },
+  { theme:'Job Search Monday', week:4, tasks:['Send or prepare 1 job application','Review budget/bills per the Command Center'], quote:'Keep going. The right one is still ahead.' },
+  { theme:'Gratitude + Reflection', week:4, tasks:['Name 3 things you\'re grateful for','Do a 20-min home reset','Send an appreciative message'], quote:'Gratitude doesn\'t erase hard. It balances it.' },
+  { theme:'Almost There', week:4, tasks:['Use one coping tool','Reflect on how far you\'ve come since Day 1','At 9pm: write tomorrow\'s Top 3'], quote:'One more day. You\'ve done this 28 times already.' },
+  { theme:'30 Days', week:4, milestone:30, tasks:['Reflect on the whole month — what changed, what\'s next','Reread your Day 1 sentence: "What I want my life to feel like is..."','Name one new goal for the next 30 days','Celebrate — really celebrate'], quote:'30 days. You did this. What\'s next?' }
+];
+const WEEK_LABELS = { 1:'Week 1 · Jun 17–23 · Start the System', 2:'Week 2 · Jun 24–30 · Deepen the Roots', 3:'Week 3 · Jul 1–7 · Rebuild the Structure', 4:'Week 4 · Jul 8–16 · Carry It Forward' };
+let challengeActiveWeek = 1;
+
+function challengeDayDate(n){
+  const d = new Date(CHALLENGE_START);
+  d.setDate(d.getDate() + (n-1));
+  return d.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
+}
+function initChallenge(){
+  const tabHost = document.getElementById('challengeWeekTabs');
+  tabHost.innerHTML = [1,2,3,4].map(w=>(
+    '<div class="pill'+(w===challengeActiveWeek?' active':'')+'" data-week="'+w+'">Week '+w+'</div>'
+  )).join('');
+  tabHost.querySelectorAll('.pill').forEach(p=>{
+    p.addEventListener('click', ()=>{
+      challengeActiveWeek = Number(p.dataset.week);
+      tabHost.querySelectorAll('.pill').forEach(x=>x.classList.toggle('active', x===p));
+      renderChallengeDays();
+    });
+  });
+  renderChallengeDays();
+}
+function renderChallengeDays(){
+  const host = document.getElementById('challengeDays');
+  const weekDays = DAYS.map((d,i)=>({...d, n:i+1})).filter(d=>d.week===challengeActiveWeek);
+  host.innerHTML = '<h3 style="margin-bottom:14px;">'+WEEK_LABELS[challengeActiveWeek]+'</h3>' + weekDays.map(d=>{
+    const n = d.n;
+    const extra = d.tasks.map((t,ti)=>(
+      '<li><input type="checkbox" data-store="chal_d'+n+'_t'+ti+'" id="chal_d'+n+'_t'+ti+'"><label for="chal_d'+n+'_t'+ti+'">'+t+'</label></li>'
+    )).join('');
+    const milestoneTag = d.milestone ? '<span class="badge done" style="margin-left:8px;">🎉 '+d.milestone+' days</span>' : '';
+    return (
+      '<div class="card">'+
+        '<div class="flex-between" style="margin-bottom:8px;">'+
+          '<h4 style="margin:0;">Day '+n+' — '+d.theme+milestoneTag+'</h4>'+
+          '<span class="muted mono" style="font-size:.78rem;">'+challengeDayDate(n)+'</span>'+
+        '</div>'+
+        '<ul class="checklist">'+
+          '<li><input type="checkbox" data-store="chal_d'+n+'_top3" id="chal_d'+n+'_top3"><label for="chal_d'+n+'_top3">♡ Write Top 3 for today</label></li>'+
+          '<li><input type="checkbox" data-store="chal_d'+n+'_checkin" id="chal_d'+n+'_checkin"><label for="chal_d'+n+'_checkin">♡ Morning + evening check-in</label></li>'+
+          '<li><input type="checkbox" data-store="chal_d'+n+'_sober" id="chal_d'+n+'_sober"><label for="chal_d'+n+'_sober">♡ Mark today as a sober day</label></li>'+
+          extra +
+        '</ul>'+
+        '<p class="quote-block" style="--accent:var(--gold); margin-top:14px; margin-bottom:0; font-size:1rem;">'+d.quote+'</p>'+
+      '</div>'
+    );
+  }).join('');
+  bindPersistentFields(host);
+}
+
+/* ============================================================
+   DEEP CLEAN DAY PLANNER — full content + renderer
+   ============================================================ */
+const DEEPCLEAN_ROOMS = [
+  { room:'Entryway', time:'45 min', blocks:[
+    { label:'Doors & Entry Points', time:'0:00–0:15', tasks:['Wipe down front door (inside & out)','Clean door handles and frames','Dust door trim and light switches'] },
+    { label:'Floors', time:'0:15–0:30', tasks:['Sweep entryway floor','Mop hard floors','Vacuum carpet area'] },
+    { label:'Decor & Pets', time:'0:30–0:45', tasks:['Wipe down walls and baseboards','Clean Litter Robot (empty, wipe exterior)','Organize & wipe down shoe rack/shoes','Dust and wipe down cat tree'] }
+  ]},
+  { room:'Hallway', time:'30 min', blocks:[
+    { label:'Walls & Surfaces', time:'0:45–1:00', tasks:['Clear any items from the hall','Wipe down walls and light switches','Dust baseboards'] },
+    { label:'Floors', time:'1:00–1:15', tasks:['Sweep/vacuum hall floor','Mop hard floors or spot-clean carpet'] }
+  ]},
+  { room:'Closets', time:'45 min', blocks:[
+    { label:'Empty & Surfaces', time:'1:15–1:30', tasks:['Empty all closets completely','Wipe down walls inside closets','Dust shelves and rods'] },
+    { label:'Floors', time:'1:30–1:45', tasks:['Vacuum carpet or sweep/mop closet floors','Wipe down baseboards inside closets'] },
+    { label:'Sort, Organize & Replace', time:'1:45–2:00', tasks:['Sort items — donate, trash, or keep','Organize remaining items neatly','Return items to closets'] }
+  ]},
+  { room:'Bathroom', time:'60 min', blocks:[
+    { label:'Trash, Vanity & Cabinet', time:'2:00–2:15', tasks:['Empty and reline trash can','Wipe down vanity, sink, and faucet','Clean out and wipe medicine cabinet'] },
+    { label:'Linen Closet & Shower', time:'2:15–2:30', tasks:['Organize and wipe down linen closet','Scrub shower walls and floor','Clean shower door/curtain and track'] },
+    { label:'Toilet', time:'2:30–2:45', tasks:['Scrub toilet bowl with cleaner','Wipe exterior of toilet (tank, base, seat)','Disinfect handle and surrounding walls'] },
+    { label:'Walls, Floors & Fan', time:'2:45–3:00', tasks:['Wipe down all bathroom walls','Scrub and mop floor','Clean exhaust fan cover (remove dust)'] }
+  ]},
+  { room:'Laundry Room', time:'45 min', blocks:[
+    { label:'Empty & Walls', time:'3:00–3:15', tasks:['Remove all items from laundry room','Wipe down walls and light switches','Dust and wipe shelves'] },
+    { label:'Appliances', time:'3:15–3:30', tasks:['Wipe down washer (interior drum, lid, seals, exterior)','Wipe down dryer (lint trap, exterior, drum)','Clean floor under and around appliances'] },
+    { label:'Finishing Touches', time:'3:30–3:45', tasks:['Scrub laundry room floor','Clean dryer vent exterior','Wipe down doors and door frames','Return items neatly to shelves'] }
+  ]},
+  { room:'Pantry', time:'30 min', blocks:[
+    { label:'Empty & Walls', time:'3:45–4:00', tasks:['Remove all pantry items','Wipe down walls and shelving','Discard expired items'] },
+    { label:'Floors & Organize', time:'4:00–4:15', tasks:['Sweep and mop pantry floor','Wipe down baseboards','Organize and return food items neatly'] }
+  ]},
+  { room:'Kitchen', time:'105 min', blocks:[
+    { label:'Refrigerator', time:'4:15–4:30', tasks:['Empty fridge, discard expired food','Remove and wash all shelves/drawers','Wipe interior walls and door seals','Clean exterior and top of fridge'] },
+    { label:'Microwave & Stove', time:'4:30–4:45', tasks:['Clean microwave inside and out (turntable, walls)','Degrease stovetop, burners, and grates','Wipe down oven exterior and control panel'] },
+    { label:'Dishwasher & Small Appliances', time:'4:45–5:00', tasks:['Run dishwasher cleaning cycle or wipe interior','Clean exterior and seals of dishwasher','Wipe down toaster, coffee maker, and other small appliances'] },
+    { label:'Cabinets & Cupboards', time:'5:00–5:15', tasks:['Wipe cabinet and cupboard doors (inside and out)','Clean cabinet hardware','Organize interior contents'] },
+    { label:'Countertops & Dishes', time:'5:15–5:30', tasks:['Deep clean all countertops and backsplash','Wash, dry, and put away all dishes','Wipe down sink and faucet, scrub basin'] },
+    { label:'Trash, Window & Walls', time:'5:30–5:45', tasks:['Empty and reline trash can, wipe exterior','Clean kitchen window (glass, sill, frame)','Wipe down all kitchen walls and light switches'] },
+    { label:'Floors', time:'5:45–6:00', tasks:['Sweep kitchen floor thoroughly','Mop entire kitchen floor','Wipe down baseboards'] }
+  ]},
+  { room:'Dining Room', time:'45 min', blocks:[
+    { label:'Empty & Walls', time:'6:00–6:15', tasks:['Clear dining room surfaces','Wipe down walls and light fixtures','Dust ceiling corners and vents'] },
+    { label:'Floors & Glass Cabinet', time:'6:15–6:30', tasks:['Sweep and mop dining room floor','Clean glass cabinet (glass, shelves, exterior)','Dust and wipe down any shelving'] },
+    { label:'Window, Freezer & Camera Case', time:'6:30–6:45', tasks:['Clean dining room window (glass, sill, frame)','Wipe down deep freezer (exterior, top, sides)','Clean and organize camera case'] }
+  ]},
+  { room:'Living Room', time:'60 min', blocks:[
+    { label:'Bookshelves & Entertainment', time:'6:45–7:00', tasks:['Dust and wipe down all bookshelves','Clean TV screen (microfiber cloth) and wipe TV stand','Organize books and decor'] },
+    { label:'Tables & Couch', time:'7:00–7:15', tasks:['Wipe down all tables (legs and undersides too)','Vacuum couch cushions and crevices','Wipe down couch frame/legs'] },
+    { label:'Windows & Walls', time:'7:15–7:30', tasks:['Clean all living room windows (glass, sill, frame)','Wipe down all walls and baseboards','Clean light switches and outlets'] },
+    { label:'Floors & Fan', time:'7:30–7:45', tasks:['Vacuum entire living room floor','Clean ceiling fan blades (pillowcase trick to trap dust)','Mop or spot-clean hard floor areas'] }
+  ]},
+  { room:'Bedroom', time:'75 min', blocks:[
+    { label:'Empty & Organize', time:'7:45–8:00', tasks:['Clear all items from bedroom floor and surfaces','Sort and put away clothes','Remove all items from under the bed'] },
+    { label:'Walls & Floors', time:'8:00–8:15', tasks:['Wipe down all bedroom walls and baseboards','Vacuum entire floor including under furniture','Wipe down light switches'] },
+    { label:'Bed, Bedding & Window', time:'8:15–8:30', tasks:['Strip the bed completely','Wash all bedding (start laundry)','Clean bedroom window (glass, sill, frame)','Flip/rotate mattress if needed'] },
+    { label:'Furniture', time:'8:30–8:45', tasks:['Dust and wipe down all bedroom furniture','Clean mirror (streak-free)','Wipe nightstands, dresser, and drawer handles'] },
+    { label:'Make Bed & Final Touches', time:'8:45–9:00', tasks:['Put on fresh, clean bedding','Make bed neatly (fluff pillows, tuck sheets)','Final walkthrough — vacuum any remaining dust','Enjoy your beautiful, clean bedroom!'] }
+  ]}
+];
+const CLEAN_DAILY_KEYS = ['clean_daily_dishes','clean_daily_counters','clean_daily_tidy','clean_daily_beds'];
+const CLEAN_WEEKLY_KEYS = ['clean_weekly_floors','clean_weekly_bathrooms','clean_weekly_laundry','clean_weekly_sheets','clean_weekly_trash'];
+const CLEAN_MONTHLY_KEYS = ['clean_monthly_dust','clean_monthly_fridge','clean_monthly_cabinets','clean_monthly_declutter','clean_monthly_windows'];
+const CLEAN_SEASONAL_KEYS = ['clean_seasonal_windows','clean_seasonal_closet','clean_seasonal_filter','clean_seasonal_exterior','clean_seasonal_garage'];
+function getSeason(d){
+  const m = d.getMonth();
+  if(m===11||m===0||m===1) return 'Winter';
+  if(m>=2&&m<=4) return 'Spring';
+  if(m>=5&&m<=7) return 'Summer';
+  return 'Fall';
+}
+function resetRotationGroup(keys){
+  keys.forEach(k=>{
+    store[k] = false;
+    const el = document.querySelector('[data-store="'+k+'"]');
+    if(el) el.checked = false;
+  });
+}
+function checkAndResetRotation(){
+  const today = new Date();
+  const todayKey = today.toISOString().slice(0,10);
+  if(store.rotationLastDaily !== todayKey){
+    resetRotationGroup(CLEAN_DAILY_KEYS);
+    store.rotationLastDaily = todayKey;
+  }
+  const weekKey = today.getFullYear()+'-W'+isoWeekNumber(today);
+  if(store.rotationLastWeekly !== weekKey){
+    resetRotationGroup(CLEAN_WEEKLY_KEYS);
+    store.rotationLastWeekly = weekKey;
+  }
+  const monthKey = today.getFullYear()+'-'+(today.getMonth()+1);
+  if(store.rotationLastMonthly !== monthKey){
+    resetRotationGroup(CLEAN_MONTHLY_KEYS);
+    store.rotationLastMonthly = monthKey;
+  }
+  const seasonKey = today.getFullYear()+'-'+getSeason(today);
+  if(store.rotationLastSeasonal !== seasonKey){
+    resetRotationGroup(CLEAN_SEASONAL_KEYS);
+    store.rotationLastSeasonal = seasonKey;
+  }
+  saveStore();
+}
+function initHomeReset(){
+  checkAndResetRotation();
+  const host = document.getElementById('deepCleanRooms');
+  let blockNum = 0;
+  if(!Array.isArray(store.deepCleanLog)) store.deepCleanLog = [];
+  host.innerHTML = DEEPCLEAN_ROOMS.map((r,ri)=>{
+    const blocksHtml = r.blocks.map((b,bi)=>{
+      blockNum++;
+      const tasks = b.tasks.map((t,ti)=>{
+        const tid = ri+'-'+bi+'-'+ti;
+        return '<li><input type="checkbox" data-deepclean-task="'+tid+'" data-deepclean-label="'+t.replace(/"/g,'&quot;')+'" data-deepclean-room="'+r.room+'"><label>'+t+'</label></li>';
+      }).join('');
+      return '<div style="margin-bottom:16px;"><h4 style="font-size:.88rem; margin-bottom:6px;">Block '+blockNum+' ('+b.time+') — '+b.label+'</h4><ul class="checklist">'+tasks+'</ul></div>';
+    }).join('');
+    return (
+      '<details class="card">'+
+        '<summary style="cursor:pointer; font-weight:700; display:flex; justify-content:space-between;"><span>'+r.room+'</span><span class="muted mono" style="font-weight:500;">'+r.time+'</span></summary>'+
+        '<div style="margin-top:14px;">'+blocksHtml+'</div>'+
+      '</details>'
+    );
+  }).join('');
+
+  host.querySelectorAll('[data-deepclean-task]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked){
+        store.deepCleanLog.push({ label:cb.dataset.deepcleanLabel, room:cb.dataset.deepcleanRoom, date:new Date().toISOString().slice(0,10) });
+        saveStore();
+        renderDeepCleanLog();
+      }
+    });
+  });
+  renderDeepCleanLog();
+}
+function renderDeepCleanLog(){
+  const host = document.getElementById('deepCleanLog');
+  if(!host) return;
+  if(!Array.isArray(store.deepCleanLog)) store.deepCleanLog = [];
+  if(store.deepCleanLog.length===0){
+    host.innerHTML = '<p class="muted">Nothing logged yet — check off tasks above and they\'ll show up here with the date.</p>';
+    return;
+  }
+  host.innerHTML = store.deepCleanLog.slice().reverse().map((entry)=>{
+    const i = store.deepCleanLog.indexOf(entry);
+    return '<div class="flex-between" style="padding:4px 0; border-bottom:1px solid var(--line); font-size:.85rem;">'+
+      '<span>✓ '+entry.label+' <span class="muted">— '+entry.room+'</span></span>'+
+      '<span class="mono muted" style="display:flex; align-items:center; gap:8px;">'+entry.date+'<button class="small-btn no-print" data-del-deepclean="'+i+'" style="padding:2px 8px; font-size:.7rem;">✕</button></span>'+
+    '</div>';
+  }).join('');
+  host.querySelectorAll('[data-del-deepclean]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = parseInt(btn.dataset.delDeepclean,10);
+      store.deepCleanLog.splice(i,1); saveStore(); renderDeepCleanLog();
+    });
+  });
+}
+
+/* ============================================================
+   MENTAL HEALTH HUB — weekly journal prompt
+   ============================================================ */
+const MH_PROMPTS = [
+  'What pattern have I noticed in myself this week — and what might it be trying to tell me?',
+  'When did I feel most like myself this week? What was different about that moment?',
+  'What\'s one thing I\'m carrying that I haven\'t said out loud yet?',
+  'If my anxiety/depression could talk, what would it actually be asking for right now?'
+];
+function isoWeekNumber(d){
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+}
+function initMentalHealth(){
+  const el = document.getElementById('mhJournalPrompt');
+  if(el) el.textContent = MH_PROMPTS[isoWeekNumber(new Date()) % MH_PROMPTS.length];
+}
+
+/* ============================================================
+   PURPOSE & VISION — monthly reflection prompt
+   ============================================================ */
+const PURPOSE_PROMPTS = [
+  'What would I do differently this month if I really believed I had the right timing, not the wrong one?',
+  'Where in my life am I waiting for permission I\'ve already earned?',
+  'What\'s one value from my list that I lived out loud this month — and one I want to practice more?'
+];
+function initPurpose(){
+  const el = document.getElementById('purposeMonthlyPrompt');
+  if(el) el.textContent = PURPOSE_PROMPTS[new Date().getMonth() % PURPOSE_PROMPTS.length];
+}
+
+
+
+/* ============================================================
+   INIT (called after all sections injected)
+   ============================================================ */
+/* ============================================================
+   IMPORTANT DATES — by month, birthdays + anniversaries
+   ============================================================ */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+function parseFullDate(str){
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((str||'').trim());
+  if(!m) return null;
+  return { month:+m[1], day:+m[2], year:+m[3] };
+}
+function initDates(){
+  if(!store.importantDates || typeof store.importantDates !== 'object'){
+    store.importantDates = {};
+    MONTHS.forEach(m=> store.importantDates[m] = { birthdays:[], anniversaries:[] });
+    saveStore();
+  }
+  MONTHS.forEach(m=>{
+    if(!store.importantDates[m]) store.importantDates[m] = { birthdays:[], anniversaries:[] };
+  });
+  renderDatesMonths();
+}
+function renderDatesMonths(){
+  const host = document.getElementById('datesMonths');
+  const today = new Date();
+  const curYear = today.getFullYear();
+  host.innerHTML = MONTHS.map(m=>{
+    const isCurrent = MONTHS[today.getMonth()]===m;
+    const data = store.importantDates[m];
+    const bRows = data.birthdays.map((b,i)=>{
+      const parsed = parseFullDate(b.date);
+      const age = parsed ? (curYear - parsed.year) : null;
+      return '<li><input type="text" data-type="birthdays" data-i="'+i+'" data-field="name" value="'+(b.name||'').replace(/"/g,'&quot;')+'" placeholder="Name" style="flex:1;">'+
+      '<input type="text" data-type="birthdays" data-i="'+i+'" data-field="date" value="'+(b.date||'').replace(/"/g,'&quot;')+'" placeholder="MM/DD/YYYY" style="width:120px;">'+
+      '<span class="muted mono date-computed" style="width:78px; font-size:.78rem;">'+(age!==null ? 'turns '+age : '')+'</span>'+
+      '<button class="small-btn danger no-print" data-del-type="birthdays" data-del-i="'+i+'">✕</button></li>';
+    }).join('');
+    const aRows = data.anniversaries.map((a,i)=>{
+      const parsed = parseFullDate(a.date);
+      const yrs = parsed ? (curYear - parsed.year) : null;
+      return '<li><input type="text" data-type="anniversaries" data-i="'+i+'" data-field="name" value="'+(a.name||'').replace(/"/g,'&quot;')+'" placeholder="What / who" style="flex:1;">'+
+      '<input type="text" data-type="anniversaries" data-i="'+i+'" data-field="date" value="'+(a.date||'').replace(/"/g,'&quot;')+'" placeholder="MM/DD/YYYY" style="width:120px;">'+
+      '<span class="muted mono date-computed" style="width:78px; font-size:.78rem;">'+(yrs!==null ? yrs+' yrs' : '')+'</span>'+
+      '<button class="small-btn danger no-print" data-del-type="anniversaries" data-del-i="'+i+'">✕</button></li>';
+    }).join('');
+    return (
+      '<details class="card" data-month="'+m+'"'+(isCurrent?' open':'')+'>'+
+        '<summary style="cursor:pointer; font-weight:700;">'+m+(isCurrent?' <span class="tag" style="background:var(--rose); color:white; margin-left:6px;">This month</span>':'')+'</summary>'+
+        '<div style="margin-top:14px;">'+
+          '<div class="flex-between"><h4 style="margin:0;">🎂 Birthdays</h4><button class="small-btn no-print" data-add-type="birthdays">+ Add</button></div>'+
+          '<ul class="checklist" style="margin-bottom:14px;">'+bRows+'</ul>'+
+          '<div class="flex-between"><h4 style="margin:0;">💍 Anniversaries</h4><button class="small-btn no-print" data-add-type="anniversaries">+ Add</button></div>'+
+          '<ul class="checklist">'+aRows+'</ul>'+
+        '</div>'+
+      '</details>'
+    );
+  }).join('');
+
+  host.querySelectorAll('details').forEach(det=>{
+    const month = det.dataset.month;
+    det.querySelectorAll('[data-add-type]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        store.importantDates[month][btn.dataset.addType].push({name:'',date:''});
+        saveStore(); renderDatesMonths();
+      });
+    });
+    det.querySelectorAll('li').forEach(li=>{
+      const dateInp = li.querySelector('[data-field="date"]');
+      const nameInp = li.querySelector('[data-field="name"]');
+      const computedSpan = li.querySelector('.date-computed');
+      [dateInp, nameInp].forEach(inp=>{
+        if(!inp) return;
+        inp.addEventListener('input', ()=>{
+          store.importantDates[month][inp.dataset.type][Number(inp.dataset.i)][inp.dataset.field] = inp.value;
+          saveStore();
+          if(inp===dateInp && computedSpan){
+            const parsed = parseFullDate(dateInp.value);
+            const curYear = new Date().getFullYear();
+            const isAnniversary = dateInp.dataset.type==='anniversaries';
+            computedSpan.textContent = parsed ? (isAnniversary ? (curYear-parsed.year)+' yrs' : 'turns '+(curYear-parsed.year)) : '';
+          }
+        });
+      });
+    });
+    det.querySelectorAll('[data-del-type]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        store.importantDates[month][btn.dataset.delType].splice(Number(btn.dataset.delI),1);
+        saveStore(); renderDatesMonths();
+      });
+    });
+  });
+}
+
+/* ============================================================
+   GIFT LIST — one draft card at a time; nothing joins the saved
+   list until Shannon clicks Save. Saved cards remain editable
+   and auto-save on change, same as before.
+   ============================================================ */
+const DEFAULT_GIFT_PEOPLE = ['Ryan','Daisy','Dominik','Mom','Dad','Sister','Kendall','Dakota','Bekki','Judy','Peggy','Matt','Troy','Marshall','Brad'];
+let giftDraft = newGiftCard();
+function initGifts(){
+  if(!Array.isArray(store.giftList)) store.giftList = [];
+  migrateGiftList();
+  renderGiftCards();
+}
+function migrateGiftList(){
+  // One-time cleanup: older versions of this file auto-seeded blank cards
+  // under preset names (Dominik, Mom, etc.) with no createdAt timestamp.
+  // Drop any survivor from that era that's still completely empty; keep
+  // (and backfill a createdAt for) anything that actually has content.
+  store.giftList = store.giftList.filter(p=>{
+    if(p.createdAt) return true;
+    const hasContent = !!(p.customName || p.occasion || p.budget || p.giftDate || p.notes ||
+      (Array.isArray(p.ideas) && p.ideas.some(i=>i)) ||
+      p.cardPrepped || p.wrapped || p.delivered);
+    return hasContent;
+  });
+  store.giftList.forEach((p,i)=>{
+    if(!p.createdAt) p.createdAt = Date.now() - (store.giftList.length - i)*1000;
+  });
+  saveStore();
+}
+function newGiftCard(){
+  return { id:Date.now()+Math.random(), name:'', customName:'', occasion:'', giftDate:'', ideas:['','','','','',''], ideaDone:[false,false,false,false,false,false], budget:'', notes:'', cardPrepped:false, wrapped:false, delivered:false };
+}
+function giftCardHasContent(p){
+  // Used to decide print visibility for the draft card — a selected name counts
+  // here (unlike the one-time legacy migration check), since picking a name from
+  // the dropdown is a deliberate action worth printing even before Save is clicked.
+  return !!(p.name || p.customName || p.occasion || p.budget || p.giftDate || p.notes ||
+    (Array.isArray(p.ideas) && p.ideas.some(i=>i)) ||
+    p.cardPrepped || p.wrapped || p.delivered);
+}
+function giftNameRowHtml(p, idPrefix){
+  const otherId = 'giftOtherName_'+idPrefix;
+  const nameOptions = DEFAULT_GIFT_PEOPLE.map(n=>'<option'+(p.name===n?' selected':'')+'>'+n+'</option>').join('') + '<option'+(p.name==='Other'?' selected':'')+'>Other</option>';
+  return (
+    '<select data-field="name" data-other-target="'+otherId+'" style="font-family:var(--font-display); font-size:1rem; font-weight:600; max-width:200px;">'+
+      '<option value=""'+(p.name?'':' selected')+'>Choose</option>'+nameOptions+
+    '</select>'+
+    '<input type="text" id="'+otherId+'" data-field="customName" value="'+(p.customName||'').replace(/"/g,'&quot;')+'" placeholder="Person\'s name" style="display:none; max-width:180px;">'
+  );
+}
+function giftCardBodyHtml(p){
+  return (
+    '<div class="field-row" style="margin-bottom:10px;">'+
+      '<div class="field" style="margin-bottom:0;"><label>Occasion</label><input type="text" data-field="occasion" value="'+(p.occasion||'').replace(/"/g,'&quot;')+'"></div>'+
+      '<div class="field" style="margin-bottom:0; max-width:130px;"><label>Budget</label><input type="text" data-field="budget" value="'+(p.budget||'').replace(/"/g,'&quot;')+'" placeholder="$"></div>'+
+      '<div class="field" style="margin-bottom:0; max-width:140px;"><label>Date</label><input type="text" data-field="giftDate" value="'+(p.giftDate||'').replace(/"/g,'&quot;')+'" placeholder="MM/DD/YYYY"></div>'+
+    '</div>'+
+    '<label>Gift ideas</label>'+
+    '<ul class="checklist" style="margin-bottom:10px;">'+
+      [0,1,2,3,4,5].map(i=>(
+        '<li><input type="checkbox" data-idea-done="'+i+'"'+(p.ideaDone&&p.ideaDone[i]?' checked':'')+'><input type="text" data-idea="'+i+'" value="'+(p.ideas&&p.ideas[i]?p.ideas[i].replace(/"/g,'&quot;'):'')+'" placeholder="Idea '+(i+1)+'" style="border:none; border-bottom:1px solid var(--line); border-radius:0;"></li>'
+      )).join('')+
+    '</ul>'+
+    '<div class="field" style="margin-bottom:10px;"><label>Notes</label><textarea data-field="notes" style="min-height:50px;">'+(p.notes||'')+'</textarea></div>'+
+    '<div class="pill-row">'+
+      '<label style="display:flex; align-items:center; gap:6px; text-transform:none; font-weight:400; color:var(--ink);"><input type="checkbox" data-status="cardPrepped"'+(p.cardPrepped?' checked':'')+'> Card prepped</label>'+
+      '<label style="display:flex; align-items:center; gap:6px; text-transform:none; font-weight:400; color:var(--ink);"><input type="checkbox" data-status="wrapped"'+(p.wrapped?' checked':'')+'> Wrapped</label>'+
+      '<label style="display:flex; align-items:center; gap:6px; text-transform:none; font-weight:400; color:var(--ink);"><input type="checkbox" data-status="delivered"'+(p.delivered?' checked':'')+'> Delivered</label>'+
+    '</div>'
+  );
+}
+function renderGiftCards(){
+  const host = document.getElementById('giftCards');
+  host.innerHTML = '';
+  store.giftList.sort((a,b)=> (a.createdAt||0) - (b.createdAt||0)); // always arranged by date added
+
+  // --- Draft card: always exactly one, never joins the saved list until Save is clicked.
+  // It only hides from print if it's genuinely empty — if Shannon has started filling
+  // it in but hasn't hit Save yet, it still prints (just without the Save controls).
+  const draftWrap = document.createElement('div');
+  draftWrap.className = 'card gift-draft-card'+(giftCardHasContent(giftDraft) ? '' : ' no-print');
+  draftWrap.id = 'giftDraftCard';
+  draftWrap.innerHTML =
+    '<div class="flex-between" style="margin-bottom:10px; flex-wrap:wrap; gap:8px;">'+
+      '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">'+
+        giftNameRowHtml(giftDraft, 'draft')+
+      '</div>'+
+      '<div class="no-print" style="display:flex; align-items:center; gap:10px;">'+
+        '<span class="muted" id="giftDraftValidation" style="display:none; color:var(--clay);">Choose or type a name first</span>'+
+        '<button class="small-btn primary" id="saveGiftDraftBtn">💾 Save Card</button>'+
+      '</div>'+
+    '</div>'+
+    giftCardBodyHtml(giftDraft);
+  host.appendChild(draftWrap);
+
+  // --- Saved cards ---
+  store.giftList.forEach((p,pi)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.pi = pi;
+    card.innerHTML =
+      '<div class="flex-between" style="margin-bottom:10px; flex-wrap:wrap; gap:8px;">'+
+        '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">'+
+          giftNameRowHtml(p, 'saved'+pi)+
+        '</div>'+
+        '<button class="small-btn danger no-print" data-del-person>✕ Remove</button>'+
+      '</div>'+
+      giftCardBodyHtml(p);
+    host.appendChild(card);
+  });
+
+  // --- Bind draft card ---
+  const syncDraftPrintClass = ()=> draftWrap.classList.toggle('no-print', !giftCardHasContent(giftDraft));
+  draftWrap.querySelectorAll('[data-field]').forEach(el=>{
+    const evt = el.tagName==='SELECT' ? 'change' : 'input';
+    el.addEventListener(evt, ()=>{ giftDraft[el.dataset.field] = el.value; syncDraftPrintClass(); });
+  });
+  draftWrap.querySelectorAll('[data-idea]').forEach(el=>{
+    el.addEventListener('input', ()=>{ giftDraft.ideas[Number(el.dataset.idea)] = el.value; syncDraftPrintClass(); });
+  });
+  draftWrap.querySelectorAll('[data-idea-done]').forEach(el=>{
+    el.addEventListener('change', ()=>{ giftDraft.ideaDone[Number(el.dataset.ideaDone)] = el.checked; syncDraftPrintClass(); });
+  });
+  draftWrap.querySelectorAll('[data-status]').forEach(el=>{
+    el.addEventListener('change', ()=>{ giftDraft[el.dataset.status] = el.checked; syncDraftPrintClass(); });
+  });
+  document.getElementById('saveGiftDraftBtn').addEventListener('click', ()=>{
+    if(!giftDraft.name && !giftDraft.customName){
+      document.getElementById('giftDraftValidation').style.display = '';
+      return;
+    }
+    giftDraft.createdAt = Date.now();
+    store.giftList.push(giftDraft);
+    saveStore();
+    giftDraft = newGiftCard();
+    renderGiftCards();
+  });
+
+  // --- Bind saved cards ---
+  host.querySelectorAll('.card[data-pi]').forEach(card=>{
+    const pi = Number(card.dataset.pi);
+    card.querySelectorAll('[data-field]').forEach(el=>{
+      const evt = el.tagName==='SELECT' ? 'change' : 'input';
+      el.addEventListener(evt, ()=>{ store.giftList[pi][el.dataset.field] = el.value; saveStore(); });
+    });
+    card.querySelectorAll('[data-idea]').forEach(el=>{
+      el.addEventListener('input', ()=>{ store.giftList[pi].ideas[Number(el.dataset.idea)] = el.value; saveStore(); });
+    });
+    card.querySelectorAll('[data-idea-done]').forEach(el=>{
+      el.addEventListener('change', ()=>{ store.giftList[pi].ideaDone[Number(el.dataset.ideaDone)] = el.checked; saveStore(); });
+    });
+    card.querySelectorAll('[data-status]').forEach(el=>{
+      el.addEventListener('change', ()=>{ store.giftList[pi][el.dataset.status] = el.checked; saveStore(); });
+    });
+    const delBtn = card.querySelector('[data-del-person]');
+    if(delBtn) delBtn.addEventListener('click', ()=>{
+      store.giftList.splice(pi,1); saveStore(); renderGiftCards();
+    });
+  });
+  bindOtherTriggers(host);
+}
+
+/* ============================================================
+   CONTACT CARDS
+   ============================================================ */
+let contactDraft = newContactCard();
+function initContacts(){
+  if(!Array.isArray(store.contacts)) store.contacts = [];
+  migrateContactsList();
+  renderContactCards();
+}
+function migrateContactsList(){
+  // Same protection as Gift List: drop empty leftover cards from older
+  // versions of this file (no createdAt + nothing filled in); keep and
+  // backfill a createdAt for anything with real content.
+  store.contacts = store.contacts.filter(c=>{
+    if(c.createdAt) return true;
+    return contactHasContent(c);
+  });
+  store.contacts.forEach((c,i)=>{
+    if(!c.createdAt) c.createdAt = Date.now() - (store.contacts.length - i)*1000;
+  });
+  saveStore();
+}
+function newContactCard(){
+  return { id:Date.now()+Math.random(), who:'', type:'', name:'', address:'', phone:'', fax:'', email:'', apptDate:'', apptTime:'', notes:'' };
+}
+function contactHasContent(c){
+  return !!(c.who || c.type || c.name || c.address || c.phone || c.fax || c.email || c.apptDate || c.apptTime || c.notes);
+}
+function contactFieldsHtml(c){
+  return (
+    '<div class="field-row">'+
+      '<div class="field"><label>Provider type</label><input type="text" data-field="type" value="'+(c.type||'').replace(/"/g,'&quot;')+'" placeholder="e.g., Therapist, Dentist"></div>'+
+      '<div class="field"><label>Provider / practice name</label><input type="text" data-field="name" value="'+(c.name||'').replace(/"/g,'&quot;')+'"></div>'+
+    '</div>'+
+    '<div class="field"><label>Address</label><input type="text" data-field="address" value="'+(c.address||'').replace(/"/g,'&quot;')+'"></div>'+
+    '<div class="field-row">'+
+      '<div class="field"><label>Phone</label><input type="text" data-field="phone" value="'+(c.phone||'').replace(/"/g,'&quot;')+'"></div>'+
+      '<div class="field"><label>Fax</label><input type="text" data-field="fax" value="'+(c.fax||'').replace(/"/g,'&quot;')+'"></div>'+
+      '<div class="field"><label>Email</label><input type="text" data-field="email" value="'+(c.email||'').replace(/"/g,'&quot;')+'"></div>'+
+    '</div>'+
+    '<div class="field-row">'+
+      '<div class="field"><label>Next appointment date</label><input type="date" data-field="apptDate" value="'+(c.apptDate||'')+'"></div>'+
+      '<div class="field"><label>Time</label><input type="time" data-field="apptTime" value="'+(c.apptTime||'')+'"></div>'+
+    '</div>'+
+    '<div class="field" style="margin-bottom:0;"><label>Notes</label><textarea data-field="notes" style="min-height:50px;">'+(c.notes||'')+'</textarea></div>'
+  );
+}
+function contactWhoSelectHtml(c){
+  return '<select data-field="who" style="max-width:140px;">'+
+    ['','Shannon','Ryan','Daisy','Dominik'].map(w=>'<option value="'+w+'"'+(c.who===w?' selected':'')+'>'+(w||'Who is this for?')+'</option>').join('')+
+  '</select>';
+}
+function renderContactCards(){
+  const host = document.getElementById('contactCards');
+  store.contacts.sort((a,b)=> (a.createdAt||0) - (b.createdAt||0)); // always arranged by date added
+  host.innerHTML = '';
+
+  // --- Draft card: always exactly one, never joins the saved list until Save is clicked.
+  // Like Gift List, it only hides from print if it's genuinely empty.
+  const draftWrap = document.createElement('div');
+  draftWrap.className = 'card'+(contactHasContent(contactDraft) ? '' : ' no-print');
+  draftWrap.id = 'contactDraftCard';
+  draftWrap.innerHTML =
+    '<div class="flex-between" style="margin-bottom:10px;">'+
+      contactWhoSelectHtml(contactDraft)+
+      '<div class="no-print" style="display:flex; align-items:center; gap:10px;">'+
+        '<span class="muted" id="contactDraftValidation" style="display:none; color:var(--clay);">Add a provider type or name first</span>'+
+        '<button class="small-btn primary" id="saveContactDraftBtn">💾 Save Card</button>'+
+      '</div>'+
+    '</div>'+
+    contactFieldsHtml(contactDraft);
+  host.appendChild(draftWrap);
+
+  // --- Saved cards ---
+  store.contacts.forEach((c,ci)=>{
+    const card = document.createElement('div');
+    card.className = 'card'+(contactHasContent(c) ? '' : ' is-blank-card');
+    card.dataset.ci = ci;
+    card.innerHTML =
+      '<div class="flex-between" style="margin-bottom:10px;">'+
+        contactWhoSelectHtml(c)+
+        '<button class="small-btn danger no-print" data-del-contact>✕ Remove</button>'+
+      '</div>'+
+      contactFieldsHtml(c);
+    host.appendChild(card);
+  });
+
+  // --- Bind draft card ---
+  const syncContactDraftPrintClass = ()=> draftWrap.classList.toggle('no-print', !contactHasContent(contactDraft));
+  draftWrap.querySelectorAll('[data-field]').forEach(el=>{
+    const evt = el.tagName==='SELECT' || el.type==='date' || el.type==='time' ? 'change' : 'input';
+    el.addEventListener(evt, ()=>{ contactDraft[el.dataset.field] = el.value; syncContactDraftPrintClass(); });
+  });
+  document.getElementById('saveContactDraftBtn').addEventListener('click', ()=>{
+    if(!contactDraft.type && !contactDraft.name){
+      document.getElementById('contactDraftValidation').style.display = '';
+      return;
+    }
+    contactDraft.createdAt = Date.now();
+    store.contacts.push(contactDraft);
+    saveStore();
+    contactDraft = newContactCard();
+    renderContactCards();
+  });
+
+  // --- Bind saved cards ---
+  host.querySelectorAll('.card[data-ci]').forEach(card=>{
+    const ci = Number(card.dataset.ci);
+    card.querySelectorAll('[data-field]').forEach(el=>{
+      const evt = el.tagName==='SELECT' || el.type==='date' || el.type==='time' ? 'change' : 'input';
+      el.addEventListener(evt, ()=>{
+        store.contacts[ci][el.dataset.field] = el.value; saveStore();
+        card.classList.toggle('is-blank-card', !contactHasContent(store.contacts[ci]));
+      });
+    });
+    const delBtn = card.querySelector('[data-del-contact]');
+    if(delBtn) delBtn.addEventListener('click', ()=>{
+      store.contacts.splice(ci,1);
+      saveStore(); renderContactCards();
+    });
+  });
+}
+
+/* ============================================================
+   .ICS CALENDAR EXPORT — shared by Appointments & Calendar Hub
+   ============================================================ */
+function icsEscape(str){
+  return String(str||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+}
+function icsDateStamp(){
+  return new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+}
+function buildICSEvent(a){
+  const uid = 'binder-'+(a.id||Date.now())+'@shannonsbinder';
+  let dtLines;
+  if(a.date && a.time){
+    const dt = a.date.replace(/-/g,'')+'T'+a.time.replace(/:/g,'')+'00';
+    dtLines = 'DTSTART:'+dt;
+  } else if(a.date){
+    const d0 = a.date.replace(/-/g,'');
+    const next = new Date(a.date+'T00:00:00'); next.setDate(next.getDate()+1);
+    const d1 = next.toISOString().slice(0,10).replace(/-/g,'');
+    dtLines = 'DTSTART;VALUE=DATE:'+d0+'\r\nDTEND;VALUE=DATE:'+d1;
+  } else {
+    return ''; // no date set — nothing to put on a calendar yet
+  }
+  return (
+    'BEGIN:VEVENT\r\n'+
+    'UID:'+uid+'\r\n'+
+    'DTSTAMP:'+icsDateStamp()+'\r\n'+
+    dtLines+'\r\n'+
+    'SUMMARY:'+icsEscape(a.title || 'Appointment')+(a.who?' ('+icsEscape(a.who)+')':'')+'\r\n'+
+    (a.location ? 'LOCATION:'+icsEscape(a.location)+'\r\n' : '')+
+    (a.notes ? 'DESCRIPTION:'+icsEscape(a.notes)+'\r\n' : '')+
+    'END:VEVENT\r\n'
+  );
+}
+function buildICSCalendar(appts){
+  const events = appts.map(buildICSEvent).filter(Boolean).join('');
+  return (
+    'BEGIN:VCALENDAR\r\n'+
+    'VERSION:2.0\r\n'+
+    'PRODID:-//Shannons Binder//Appointments//EN\r\n'+
+    'CALSCALE:GREGORIAN\r\n'+
+    events+
+    'END:VCALENDAR\r\n'
+  );
+}
+function icsFilenameFor(a){
+  const slug = (a.title||'appointment').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'appointment';
+  return slug+(a.date?'-'+a.date:'')+'.ics';
+}
+function downloadICSFile(filename, content){
+  const blob = new Blob([content], {type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=> URL.revokeObjectURL(url), 1000);
+}
+
+/* ============================================================
+   APPOINTMENTS & CALENDAR HUB
+   ============================================================ */
+let apptDraft = newAppt();
+function initAppointments(){
+  if(!Array.isArray(store.appointments)) store.appointments = [];
+  renderApptCards();
+  document.getElementById('exportAllApptsBtn').addEventListener('click', exportAllAppointments);
+}
+function newAppt(){
+  return { id:Date.now()+Math.random(), who:'', title:'', date:'', time:'', location:'', notes:'' };
+}
+function apptHasContent(a){
+  return !!(a.who || a.title || a.date || a.time || a.location || a.notes);
+}
+function apptWhoSelectHtml(a){
+  return '<select data-field="who" style="max-width:160px;">'+
+    ['','Shannon','Ryan','Daisy','Dominik','Whole family'].map(w=>'<option value="'+w+'"'+(a.who===w?' selected':'')+'>'+(w||'Who is this for?')+'</option>').join('')+
+  '</select>';
+}
+function apptFieldsHtml(a){
+  return (
+    '<div class="field"><label>What it is</label><input type="text" data-field="title" value="'+(a.title||'').replace(/"/g,'&quot;')+'" placeholder="e.g., Dr. Patel — annual checkup"></div>'+
+    '<div class="field-row">'+
+      '<div class="field"><label>Date</label><input type="date" data-field="date" value="'+(a.date||'')+'"></div>'+
+      '<div class="field"><label>Time</label><input type="time" data-field="time" value="'+(a.time||'')+'"></div>'+
+    '</div>'+
+    '<div class="field"><label>Location / provider</label><input type="text" data-field="location" value="'+(a.location||'').replace(/"/g,'&quot;')+'"></div>'+
+    '<div class="field" style="margin-bottom:0;"><label>Prep notes — what to bring, questions to ask</label><textarea data-field="notes" style="min-height:60px;">'+(a.notes||'')+'</textarea></div>'
+  );
+}
+function renderApptCards(){
+  const host = document.getElementById('apptCards');
+  host.innerHTML = '';
+  store.appointments.sort((a,b)=>{
+    if(!a.date && !b.date) return (a.createdAt||0)-(b.createdAt||0);
+    if(!a.date) return 1;
+    if(!b.date) return -1;
+    return a.date.localeCompare(b.date) || (a.time||'').localeCompare(b.time||'');
+  });
+
+  const draftWrap = document.createElement('div');
+  draftWrap.className = 'card'+(apptHasContent(apptDraft) ? '' : ' no-print');
+  draftWrap.id = 'apptDraftCard';
+  draftWrap.innerHTML =
+    '<div class="flex-between" style="margin-bottom:10px; flex-wrap:wrap; gap:8px;">'+
+      apptWhoSelectHtml(apptDraft)+
+      '<div class="no-print" style="display:flex; align-items:center; gap:10px;">'+
+        '<span class="muted" id="apptDraftValidation" style="display:none; color:var(--clay);">Add a title first</span>'+
+        '<button class="small-btn primary" id="saveApptDraftBtn">💾 Save</button>'+
+      '</div>'+
+    '</div>'+
+    apptFieldsHtml(apptDraft);
+  host.appendChild(draftWrap);
+
+  store.appointments.forEach((a,ai)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.ai = ai;
+    card.innerHTML =
+      '<div class="flex-between" style="margin-bottom:10px; flex-wrap:wrap; gap:8px;">'+
+        apptWhoSelectHtml(a)+
+        '<div class="no-print" style="display:flex; align-items:center; gap:10px;">'+
+          '<button class="small-btn" data-ics-single>⬇ Add to calendar</button>'+
+          '<button class="small-btn danger" data-del-appt>✕ Remove</button>'+
+        '</div>'+
+      '</div>'+
+      apptFieldsHtml(a);
+    host.appendChild(card);
+  });
+
+  const syncDraftPrintClass = ()=> draftWrap.classList.toggle('no-print', !apptHasContent(apptDraft));
+  draftWrap.querySelectorAll('[data-field]').forEach(el=>{
+    const evt = (el.tagName==='SELECT' || el.type==='date' || el.type==='time') ? 'change' : 'input';
+    el.addEventListener(evt, ()=>{ apptDraft[el.dataset.field] = el.value; syncDraftPrintClass(); });
+  });
+  document.getElementById('saveApptDraftBtn').addEventListener('click', ()=>{
+    if(!apptDraft.title){
+      document.getElementById('apptDraftValidation').style.display = '';
+      return;
+    }
+    apptDraft.createdAt = Date.now();
+    store.appointments.push(apptDraft);
+    saveStore();
+    apptDraft = newAppt();
+    renderApptCards();
+  });
+
+  host.querySelectorAll('.card[data-ai]').forEach(card=>{
+    const ai = Number(card.dataset.ai);
+    card.querySelectorAll('[data-field]').forEach(el=>{
+      const evt = (el.tagName==='SELECT' || el.type==='date' || el.type==='time') ? 'change' : 'input';
+      el.addEventListener(evt, ()=>{ store.appointments[ai][el.dataset.field] = el.value; saveStore(); });
+    });
+    const delBtn = card.querySelector('[data-del-appt]');
+    if(delBtn) delBtn.addEventListener('click', ()=>{
+      store.appointments.splice(ai,1); saveStore(); renderApptCards();
+    });
+    const icsBtn = card.querySelector('[data-ics-single]');
+    if(icsBtn) icsBtn.addEventListener('click', ()=>{
+      downloadICSFile(icsFilenameFor(store.appointments[ai]), buildICSCalendar([store.appointments[ai]]));
+    });
+  });
+}
+function exportAllAppointments(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().slice(0,10);
+  const upcoming = store.appointments.filter(a=> a.date && a.date >= todayStr);
+  if(!upcoming.length){ alert('No upcoming appointments with a date set yet.'); return; }
+  downloadICSFile('upcoming-appointments.ics', buildICSCalendar(upcoming));
+}
+
+/* ============================================================
+   TRANSPORTATION & LOGISTICS
+   ============================================================ */
+let vehicleDraft = newVehicle();
+function initTransportation(){
+  if(!Array.isArray(store.vehicles)) store.vehicles = [];
+  renderVehicleCards();
+}
+function newVehicle(){
+  return { id:Date.now()+Math.random(), name:'', oilChangeDue:'', registrationExpiry:'', insuranceRenewal:'', notes:'' };
+}
+function vehicleHasContent(v){
+  return !!(v.name || v.oilChangeDue || v.registrationExpiry || v.insuranceRenewal || v.notes);
+}
+function vehicleFieldsHtml(v){
+  return (
+    '<div class="field"><label>Vehicle</label><input type="text" data-field="name" value="'+(v.name||'').replace(/"/g,'&quot;')+'" placeholder="e.g., Ryan&#39;s truck"></div>'+
+    '<div class="field-row">'+
+      '<div class="field"><label>Next oil change due</label><input type="date" data-field="oilChangeDue" value="'+(v.oilChangeDue||'')+'"></div>'+
+      '<div class="field"><label>Registration expires</label><input type="date" data-field="registrationExpiry" value="'+(v.registrationExpiry||'')+'"></div>'+
+      '<div class="field"><label>Insurance renews</label><input type="date" data-field="insuranceRenewal" value="'+(v.insuranceRenewal||'')+'"></div>'+
+    '</div>'+
+    '<div class="field" style="margin-bottom:0;"><label>Notes</label><textarea data-field="notes" style="min-height:50px;">'+(v.notes||'')+'</textarea></div>'
+  );
+}
+function renderVehicleCards(){
+  const host = document.getElementById('vehicleCards');
+  host.innerHTML = '';
+  store.vehicles.sort((a,b)=> (a.createdAt||0)-(b.createdAt||0));
+
+  const draftWrap = document.createElement('div');
+  draftWrap.className = 'card'+(vehicleHasContent(vehicleDraft) ? '' : ' no-print');
+  draftWrap.id = 'vehicleDraftCard';
+  draftWrap.innerHTML =
+    '<div class="flex-between no-print" style="margin-bottom:10px;">'+
+      '<span class="muted" id="vehicleDraftValidation" style="display:none; color:var(--clay);">Name the vehicle first</span>'+
+      '<button class="small-btn primary" id="saveVehicleDraftBtn">💾 Save</button>'+
+    '</div>'+
+    vehicleFieldsHtml(vehicleDraft);
+  host.appendChild(draftWrap);
+
+  store.vehicles.forEach((v,vi)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.vi = vi;
+    card.innerHTML =
+      '<div class="flex-between no-print" style="margin-bottom:10px;">'+
+        '<button class="small-btn danger" data-del-vehicle>✕ Remove</button>'+
+      '</div>'+
+      vehicleFieldsHtml(v);
+    host.appendChild(card);
+  });
+
+  const syncDraftPrintClass = ()=> draftWrap.classList.toggle('no-print', !vehicleHasContent(vehicleDraft));
+  draftWrap.querySelectorAll('[data-field]').forEach(el=>{
+    const evt = el.type==='date' ? 'change' : 'input';
+    el.addEventListener(evt, ()=>{ vehicleDraft[el.dataset.field] = el.value; syncDraftPrintClass(); });
+  });
+  document.getElementById('saveVehicleDraftBtn').addEventListener('click', ()=>{
+    if(!vehicleDraft.name){
+      document.getElementById('vehicleDraftValidation').style.display = '';
+      return;
+    }
+    vehicleDraft.createdAt = Date.now();
+    store.vehicles.push(vehicleDraft);
+    saveStore();
+    vehicleDraft = newVehicle();
+    renderVehicleCards();
+  });
+
+  host.querySelectorAll('.card[data-vi]').forEach(card=>{
+    const vi = Number(card.dataset.vi);
+    card.querySelectorAll('[data-field]').forEach(el=>{
+      const evt = el.type==='date' ? 'change' : 'input';
+      el.addEventListener(evt, ()=>{ store.vehicles[vi][el.dataset.field] = el.value; saveStore(); });
+    });
+    const delBtn = card.querySelector('[data-del-vehicle]');
+    if(delBtn) delBtn.addEventListener('click', ()=>{
+      store.vehicles.splice(vi,1); saveStore(); renderVehicleCards();
+    });
+  });
+}
+
+/* ============================================================
+   HOUSEHOLD SUPPLIES & INVENTORY
+   ============================================================ */
+function initSupplies(){
+  if(!Array.isArray(store.supplyList)) store.supplyList = [];
+  renderSupplyList();
+  document.getElementById('addSupplyBtn').addEventListener('click', addSupplyItem);
+  document.getElementById('newSupplyInput').addEventListener('keydown', (e)=>{
+    if(e.key==='Enter'){ e.preventDefault(); addSupplyItem(); }
+  });
+  document.getElementById('clearCheckedSuppliesBtn').addEventListener('click', ()=>{
+    store.supplyList = store.supplyList.filter(item=> !item.checked);
+    saveStore(); renderSupplyList();
+  });
+}
+function addSupplyItem(){
+  const input = document.getElementById('newSupplyInput');
+  const text = input.value.trim();
+  if(!text) return;
+  store.supplyList.push({ id:Date.now()+Math.random(), text, checked:false });
+  input.value = '';
+  saveStore();
+  renderSupplyList();
+}
+function renderSupplyList(){
+  const host = document.getElementById('supplyListHost');
+  host.innerHTML = '';
+  if(!store.supplyList.length){
+    host.innerHTML = '<li class="muted no-print" style="list-style:none;">Nothing on the list right now — add something above.</li>';
+    return;
+  }
+  store.supplyList.forEach((item,ii)=>{
+    const li = document.createElement('li');
+    li.style.display='flex'; li.style.alignItems='center'; li.style.gap='8px';
+    li.innerHTML =
+      '<input type="checkbox" id="supplyItem_'+ii+'"'+(item.checked?' checked':'')+'>'+
+      '<label for="supplyItem_'+ii+'" style="flex:1;">'+String(item.text).replace(/</g,'&lt;')+'</label>'+
+      '<button class="small-btn danger no-print" data-del-supply style="margin-left:8px;">✕</button>';
+    host.appendChild(li);
+  });
+  host.querySelectorAll('input[type="checkbox"]').forEach((cb,ii)=>{
+    cb.addEventListener('change', ()=>{ store.supplyList[ii].checked = cb.checked; saveStore(); });
+  });
+  host.querySelectorAll('[data-del-supply]').forEach((btn,ii)=>{
+    btn.addEventListener('click', ()=>{ store.supplyList.splice(ii,1); saveStore(); renderSupplyList(); });
+  });
+}
+
+/* ============================================================
+   SUNDAY REVIEW — live pulls from Financial Center + Contact Cards + Meal Plan
+   (per Shannon's note: all "see Section X" references should pull
+   the actual data instead of just pointing to it)
+   ============================================================ */
+function renderSundayPulls(){
+  const weekOfEl = document.getElementById('sundayWeekOf');
+  let weekStart = new Date();
+  if(weekOfEl && weekOfEl.value){
+    const parts = weekOfEl.value.split('-').map(Number);
+    weekStart = new Date(parts[0], parts[1]-1, parts[2]);
+  }
+  weekStart = dateOnly(weekStart);
+  const weekEnd = new Date(weekStart.getTime() + 6*DAY_MS);
+
+  const billsHost = document.getElementById('sundayBillsPull');
+  if(billsHost){
+    const checks = (typeof getUpcomingPaychecks==='function') ? getUpcomingPaychecks(1, weekStart) : [];
+    billsHost.innerHTML = checks.length ? checks.map(c=>(
+      '<div class="flex-between" style="padding:4px 0; border-bottom:1px solid var(--line); font-size:.9rem;">'+
+        '<span>'+c.date.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})+' — '+c.label+'</span>'+
+        '<span class="mono muted">'+(c.amount ? '~$'+c.amount.toLocaleString() : 'varies')+'</span>'+
+      '</div>'
+    )).join('') : '<p class="muted">No paychecks landing this week.</p>';
+  }
+
+  const apptHost = document.getElementById('sundayApptPull');
+  if(apptHost){
+    const contacts = Array.isArray(store.contacts) ? store.contacts : [];
+    const upcoming = contacts.filter(c=>{
+      if(!c.apptDate) return false;
+      const parts = c.apptDate.split('-').map(Number);
+      const d = new Date(parts[0], parts[1]-1, parts[2]);
+      return d >= weekStart && d <= weekEnd;
+    }).sort((a,b)=> a.apptDate.localeCompare(b.apptDate));
+    apptHost.innerHTML = upcoming.length ? upcoming.map(c=>{
+      const parts = c.apptDate.split('-').map(Number);
+      const d = new Date(parts[0], parts[1]-1, parts[2]);
+      return '<div class="flex-between" style="padding:4px 0; border-bottom:1px solid var(--line); font-size:.9rem;">'+
+        '<span>'+d.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})+(c.apptTime?' '+c.apptTime:'')+' — '+(c.type||'Appointment')+(c.name?' ('+c.name+')':'')+'</span>'+
+        '<span class="muted">'+(c.who||'')+'</span>'+
+      '</div>';
+    }).join('') : '<p class="muted">No appointments on file for this week. Add next-appointment dates in Section 14 — Contact Cards.</p>';
+  }
+
+  const mealsHost = document.getElementById('sundayMealsPull');
+  if(mealsHost){
+    const days = [['mon','Mon'],['tue','Tue'],['wed','Wed'],['thu','Thu'],['fri','Fri'],['sat','Sat'],['sun','Sun']];
+    mealsHost.innerHTML = '<table class="ledger" style="margin:0;"><tr><th style="width:60px;">Day</th><th>Meal</th></tr>'+
+      days.map(([key,label])=>{
+        const el = document.getElementById('mealCur_'+key);
+        const val = el ? (el.value || '—') : '—';
+        return '<tr><td class="label-cell">'+label+'</td><td>'+val.replace(/</g,'&lt;')+'</td></tr>';
+      }).join('')+
+    '</table>';
+  }
+}
+
+function initBinder(){
+  bindPersistentFields(document);
+  bindPillGroups(document);
+  bindMultiPillGroups(document);
+  bindTempPillGroups(document);
+  bindOtherTriggers(document);
+
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> showPage(btn.dataset.target));
+  });
+  document.querySelectorAll('[data-print]').forEach(btn=>{
+    btn.addEventListener('click', ()=> printSection(btn.dataset.print));
+  });
+
+  const startPage = store.__lastPage && document.getElementById(store.__lastPage) ? store.__lastPage : 'dashboard';
+  showPage(startPage);
+
+  if(typeof initDashboard==='function') initDashboard();
+  if(typeof initCheckin==='function') initCheckin();
+  if(typeof initSobriety==='function') initSobriety();
+  if(typeof initSavings==='function') initSavings();
+  if(typeof initBankruptcy==='function') initBankruptcy();
+  if(typeof initChallenge==='function') initChallenge();
+  if(typeof initHomeReset==='function') initHomeReset();
+  if(typeof initFinancial==='function') initFinancial();
+  if(typeof initMentalHealth==='function') initMentalHealth();
+  if(typeof initPurpose==='function') initPurpose();
+  if(typeof initDates==='function') initDates();
+  if(typeof initGifts==='function') initGifts();
+  if(typeof initContacts==='function') initContacts();
+  if(typeof initAppointments==='function') initAppointments();
+  if(typeof initTransportation==='function') initTransportation();
+  if(typeof initSupplies==='function') initSupplies();
+  const weekOfEl = document.getElementById('sundayWeekOf');
+  if(weekOfEl) weekOfEl.addEventListener('change', renderSundayPulls);
+}
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ============================================================
+   FIREBASE CONFIG — replace the values below with your own project's
+   config object. Find it in: Firebase console -> Project settings ->
+   General -> Your apps -> Web app -> SDK setup and configuration.
+   (If Firebase suggests a newer SDK version than 10.12.2 above, that's fine to use instead.)
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAhFRinBj5Fm4G8mguuv1ytunvFVH13rtM",
+  authDomain: "shannonsbinder.firebaseapp.com",
+  projectId: "shannonsbinder",
+  storageBucket: "shannonsbinder.firebasestorage.app",
+  messagingSenderId: "628898686505",
+  appId: "1:628898686505:web:139fc5cf4672c699a6de38",
+  measurementId: "G-WJBSML4W3V"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+const googleProvider = new GoogleAuthProvider();
+
+const authGateEl = document.getElementById('authGate');
+const loadingGateEl = document.getElementById('loadingGate');
+const appShellEl = document.getElementById('appShell');
+const authErrorEl = document.getElementById('authError');
+
+let currentUser = null;
+let binderStarted = false;
+let cloudSaveTimer = null;
+
+function userDocRef(uid){ return doc(db, 'binders', uid); }
+
+async function pushToCloud(){
+  if(!currentUser) return;
+  try{
+    await setDoc(userDocRef(currentUser.uid), getStoreSnapshot(), { merge: true });
+  } catch(err){
+    console.warn('Cloud sync failed. Your data is still saved on this device and will retry on the next change.', err);
+  }
+}
+function debouncedCloudPush(){
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(pushToCloud, 1200);
+}
+
+function withTimeout(promise, ms){
+  return new Promise((resolve)=>{
+    let settled = false;
+    const timer = setTimeout(()=>{
+      if(!settled){ settled = true; resolve({ timedOut:true }); }
+    }, ms);
+    promise.then(value=>{
+      if(!settled){ settled = true; clearTimeout(timer); resolve({ timedOut:false, value }); }
+    }).catch(error=>{
+      if(!settled){ settled = true; clearTimeout(timer); resolve({ timedOut:false, error }); }
+    });
+  });
+}
+
+async function loadAndStartBinder(user){
+  let cloudData = null;
+  const result = await withTimeout(getDoc(userDocRef(user.uid)), 6000);
+  if(result.timedOut){
+    console.warn('Cloud is taking longer than 6 seconds to respond — starting with what is saved on this device instead of waiting. Your data is still safe; this device just did not wait for the cloud copy this time.');
+  } else if(result.error){
+    console.warn('Could not reach the cloud right now. Starting from what is saved on this device.', result.error);
+  } else if(result.value && result.value.exists()){
+    cloudData = result.value.data();
+  }
+  const localData = loadStore();
+  if(cloudData && Object.keys(cloudData).length){
+    setStoreSnapshot(cloudData);
+  } else if(localData && Object.keys(localData).length){
+    setStoreSnapshot(localData);
+    pushToCloud(); // first-time migration of this device's local data up to the cloud
+  } else {
+    setStoreSnapshot({});
+  }
+  window.__cloudSync = debouncedCloudPush;
+
+  loadingGateEl.style.display = 'none';
+  appShellEl.style.display = '';
+  initBinder();
+}
+
+function showAuthError(msg){
+  if(!authErrorEl) return;
+  authErrorEl.textContent = msg;
+  authErrorEl.style.display = '';
+}
+
+function updateUserBadge(user){
+  const el = document.getElementById('userBadge');
+  if(el) el.textContent = user.email || user.displayName || '';
+}
+
+document.getElementById('googleSignInBtn').addEventListener('click', async ()=>{
+  authErrorEl.style.display = 'none';
+  try{
+    await signInWithPopup(auth, googleProvider);
+  } catch(err){
+    console.error(err);
+    showAuthError('Sign-in did not go through. Please try again.');
+  }
+});
+
+document.getElementById('signOutBtn').addEventListener('click', ()=>{ signOut(auth); });
+
+onAuthStateChanged(auth, async (user)=>{
+  if(user){
+    currentUser = user;
+    updateUserBadge(user);
+    authGateEl.style.display = 'none';
+    appShellEl.style.display = 'none';
+    loadingGateEl.style.display = '';
+    if(binderStarted){
+      // Signed back in after a sign-out earlier in this same page session —
+      // reload for a clean start instead of re-binding everything in place.
+      location.reload();
+      return;
+    }
+    binderStarted = true;
+    await loadAndStartBinder(user);
+  } else {
+    currentUser = null;
+    window.__cloudSync = null;
+    loadingGateEl.style.display = 'none';
+    appShellEl.style.display = 'none';
+    authGateEl.style.display = '';
+  }
+});
+</script>
+</body>
+</html>
