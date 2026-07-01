@@ -928,7 +928,7 @@ table.ledger tr:last-child td{ border-bottom:none; }
 
     <div class="card" id="finMilestoneCard">
       <div class="field" data-milestone="lawyer">
-        <div class="progress-row"><span>Lawyer paid off — target July 29 (frees $300/mo)</span></div>
+        <div class="progress-row"><span>Lawyer paid off — 5 payments of $150 on Quest paydays through 9/10</span></div>
         <div class="progress-track"><div class="progress-fill" id="fin-bar-lawyer" style="width:5%"></div></div>
       </div>
       <div class="field" data-milestone="savings" style="margin-bottom:0;">
@@ -1627,65 +1627,59 @@ const INCOME_SOURCES = [
 /* Fixed bill checklist per paycheck, July–December 2026, from the Bill Payment Checklist.
    Each bill row is checked off individually and saved on this device. */
 const PAYCHECK_SCHEDULE = [
-{date:'2026-07-02', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'LOT RENT',a:670},{l:'WATER',a:85},{l:'INTERNET',a:85},{l:'AMAZON',a:8},{l:'CONSUMERS - Arrears Plan',a:82.82}]},
-{date:'2026-07-03', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-07-10', source:'Burkland (Ryan)', amount:250, bills:[], note:'builds balance — no bills due from this check'},
-{date:'2026-07-10', source:'SSI - Children', amount:1700, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'ORTHODONTIST',a:275},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 1 of 2',a:236},{l:'SPECTRUM',a:20},{l:'DISNEY/HULU',a:8},{l:'CLAUDE',a:20},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 2 of 2',a:236},{l:'MORTGAGE',a:678},{l:'CONSUMERS - Arrears Plan',a:82.82}]},
-{date:'2026-07-16', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'LAWYER',a:150},{l:'STORAGE',a:195},{l:'NETFLIX',a:29},{l:'VERIZON',a:460},{l:'CAR INSURANCE',a:182},{l:'VARIABLE SPENDING (flex weekly bundle)',a:236},{l:'PARAMOUNT',a:5}]},
-{date:'2026-07-17', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-07-20', source:'Chuck Caretaking (Shannon)', amount:900, bills:[{l:'HBO',a:8},{l:'GOOGLE',a:3},{l:'CONSUMERS',a:400},{l:'PLAYSTATION',a:12},{l:'DISCOVERY PLUS',a:4},{l:'VARIABLE SPENDING (flex weekly bundle)',a:236},{l:'HP INK',a:21},{l:'AMC',a:3},{l:'PEACOCK',a:6},{l:'YOUTUBE PREMIUM',a:29}]},
-{date:'2026-07-24', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'CONSUMERS - Arrears Plan',a:82.82}]},
-{date:'2026-07-30', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'LAWYER',a:150},{l:'RING',a:20}]},
-{date:'2026-07-31', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'LOT RENT',a:670},{l:'WATER',a:85},{l:'INTERNET',a:85}]},
-
-{date:'2026-08-07', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'CONSUMERS - Arrears Plan',a:82.82}]},
-{date:'2026-08-13', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'LAWYER',a:150},{l:'MICROSOFT',a:25},{l:'SPOTIFY',a:22},{l:'PRIME VIDEO',a:6},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 1 of 2',a:236},{l:'AMAZON',a:8},{l:'ORTHODONTIST',a:275},{l:'KRATOM',a:60},{l:'SPECTRUM',a:20},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 2 of 2',a:300},{l:'DISNEY/HULU',a:8},{l:'CLAUDE',a:20}]},
-{date:'2026-08-14', source:'Burkland (Ryan)', amount:250, bills:[], note:'builds balance — no bills due from this check'},
-{date:'2026-08-14', source:'SSI - Children', amount:1700, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'VARIABLE SPENDING (flex weekly bundle)',a:300},{l:'MORTGAGE',a:678},{l:'STORAGE',a:195},{l:'NETFLIX',a:29},{l:'VERIZON',a:270},{l:'CAR INSURANCE',a:100},{l:'PARAMOUNT',a:5},{l:'HBO',a:8},{l:'GOOGLE',a:3}]},
-{date:'2026-08-20', source:'Chuck Caretaking (Shannon)', amount:900, bills:[{l:'VARIABLE SPENDING (flex weekly bundle)',a:300},{l:'CONSUMERS',a:400},{l:'PLAYSTATION',a:12},{l:'DISCOVERY PLUS',a:4},{l:'HP INK',a:21},{l:'AMC',a:3},{l:'PEACOCK',a:6},{l:'YOUTUBE PREMIUM',a:29},{l:'RING',a:20},{l:'MICROSOFT',a:25},{l:'SPOTIFY',a:22}]},
-{date:'2026-08-21', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'CONSUMERS - Arrears Plan',a:82.83}]},
-{date:'2026-08-27', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'LAWYER',a:150}]},
-{date:'2026-08-28', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'LOT RENT',a:670},{l:'WATER',a:85},{l:'INTERNET',a:85}]},
-
-{date:'2026-09-04', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-09-10', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'LAWYER',a:150},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 1 of 3',a:300},{l:'PRIME VIDEO',a:6},{l:'AMAZON',a:8},{l:'ORTHODONTIST',a:275},{l:'KRATOM',a:60},{l:'SPECTRUM',a:20},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 2 of 3',a:300},{l:'DISNEY/HULU',a:8},{l:'CLAUDE',a:20},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 3 of 3',a:300}]},
-{date:'2026-09-11', source:'Burkland (Ryan)', amount:250, bills:[], note:'builds balance — no bills due from this check'},
-{date:'2026-09-11', source:'SSI - Children', amount:1700, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'MORTGAGE',a:575},{l:'STORAGE',a:195},{l:'NETFLIX',a:29},{l:'VERIZON',a:370},{l:'CAR INSURANCE',a:100},{l:'PARAMOUNT',a:5},{l:'HBO',a:8}]},
-{date:'2026-09-18', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-09-20', source:'Chuck Caretaking (Shannon)', amount:900, bills:[{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 1 of 2',a:300},{l:'GOOGLE',a:3},{l:'CONSUMERS',a:400},{l:'PLAYSTATION',a:12},{l:'DISCOVERY PLUS',a:4},{l:'HP INK',a:21},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 2 of 2',a:300},{l:'AMC',a:3},{l:'PEACOCK',a:6},{l:'YOUTUBE PREMIUM',a:29},{l:'RING',a:20},{l:'MICROSOFT',a:25},{l:'SPOTIFY',a:22}]},
-{date:'2026-09-24', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'PRIME VIDEO',a:6},{l:'AMAZON',a:8},{l:'Mortgage Arrears Extra Payment',a:36.50}]},
-{date:'2026-09-25', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'LOT RENT',a:670},{l:'WATER',a:85},{l:'INTERNET',a:85}]},
-
-{date:'2026-10-02', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-10-08', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'ORTHODONTIST',a:275},{l:'KRATOM',a:60},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 1 of 2',a:300},{l:'SPECTRUM',a:20},{l:'DISNEY/HULU',a:8},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 2 of 2',a:300},{l:'CLAUDE',a:20}]},
-{date:'2026-10-09', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-10-16', source:'Burkland (Ryan)', amount:250, bills:[], note:'builds balance — no bills due from this check'},
-{date:'2026-10-16', source:'SSI - Children', amount:1700, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'MORTGAGE',a:575},{l:'STORAGE',a:195},{l:'VARIABLE SPENDING (flex weekly bundle)',a:300},{l:'NETFLIX',a:29},{l:'VERIZON',a:370},{l:'CAR INSURANCE',a:100},{l:'PARAMOUNT',a:5},{l:'HBO',a:8},{l:'GOOGLE',a:3},{l:'CONSUMERS',a:400}]},
-{date:'2026-10-20', source:'Chuck Caretaking (Shannon)', amount:900, bills:[{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 1 of 2',a:300},{l:'PLAYSTATION',a:12},{l:'DISCOVERY PLUS',a:4},{l:'HP INK',a:21},{l:'AMC',a:3},{l:'PEACOCK',a:6},{l:'YOUTUBE PREMIUM',a:29},{l:'RING',a:20},{l:'MICROSOFT',a:25},{l:'SPOTIFY',a:22},{l:'PRIME VIDEO',a:6},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 2 of 2',a:300},{l:'AMAZON',a:8}]},
-{date:'2026-10-22', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'ORTHODONTIST',a:275},{l:'KRATOM',a:60},{l:'SPECTRUM',a:20}]},
-{date:'2026-10-23', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-10-30', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'LOT RENT',a:670},{l:'WATER',a:85},{l:'INTERNET',a:85}]},
-
-{date:'2026-11-05', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 1 of 2',a:300},{l:'DISNEY/HULU',a:8},{l:'CLAUDE',a:20},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 2 of 2',a:300},{l:'MORTGAGE',a:575}]},
-{date:'2026-11-06', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-11-13', source:'Burkland (Ryan)', amount:250, bills:[], note:'builds balance — no bills due from this check'},
-{date:'2026-11-13', source:'SSI - Children', amount:1700, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'STORAGE',a:195},{l:'NETFLIX',a:29},{l:'VERIZON',a:370},{l:'CAR INSURANCE',a:100},{l:'PARAMOUNT',a:5},{l:'HBO',a:8},{l:'GOOGLE',a:3},{l:'VARIABLE SPENDING (flex weekly bundle)',a:300},{l:'CONSUMERS',a:400},{l:'PLAYSTATION',a:12},{l:'DISCOVERY PLUS',a:4},{l:'HP INK',a:21},{l:'AMC',a:3},{l:'PEACOCK',a:6},{l:'YOUTUBE PREMIUM',a:29},{l:'RING',a:20}]},
-{date:'2026-11-19', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 1 of 3',a:300},{l:'MICROSOFT',a:25},{l:'SPOTIFY',a:22},{l:'PRIME VIDEO',a:6},{l:'AMAZON',a:8},{l:'ORTHODONTIST',a:275},{l:'KRATOM',a:60},{l:'SPECTRUM',a:20},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 2 of 3',a:300},{l:'DISNEY/HULU',a:8},{l:'CLAUDE',a:20},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 3 of 3',a:300}]},
-{date:'2026-11-20', source:'Burkland (Ryan)', amount:250, bills:[], note:'builds balance — no bills due from this check'},
-{date:'2026-11-20', source:'Chuck Caretaking (Shannon)', amount:900, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-11-27', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'LOT RENT',a:670},{l:'WATER',a:85},{l:'INTERNET',a:85}]},
-
-{date:'2026-12-03', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'MORTGAGE',a:575},{l:'STORAGE',a:195},{l:'NETFLIX',a:29},{l:'VERIZON',a:370},{l:'Mortgage Arrears Extra Payment',a:31.00}]},
-{date:'2026-12-04', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-12-11', source:'Burkland (Ryan)', amount:250, bills:[], note:'builds balance — no bills due from this check'},
-{date:'2026-12-11', source:'SSI - Children', amount:1700, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350},{l:'CAR INSURANCE',a:100},{l:'PARAMOUNT',a:5},{l:'HBO',a:8},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 1 of 2',a:300},{l:'GOOGLE',a:3},{l:'CONSUMERS',a:400},{l:'PLAYSTATION',a:12},{l:'DISCOVERY PLUS',a:4},{l:'HP INK',a:21},{l:'VARIABLE SPENDING (flex weekly bundle) – catch-up week 2 of 2',a:300},{l:'AMC',a:3},{l:'PEACOCK',a:6},{l:'YOUTUBE PREMIUM',a:29},{l:'RING',a:20},{l:'MICROSOFT',a:25},{l:'SPOTIFY',a:22},{l:'PRIME VIDEO',a:6},{l:'Mortgage Arrears Extra Payment',a:336.00}]},
-{date:'2026-12-17', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[{l:'Mortgage Arrears Extra Payment',a:952.50},{l:'Orthodontist Arrears Extra Payment',a:247.50}]},
-{date:'2026-12-18', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-12-20', source:'Chuck Caretaking (Shannon)', amount:900, bills:[{l:'Orthodontist Arrears Extra Payment',a:152.50}]},
-{date:'2026-12-25', source:'Burkland (Ryan)', amount:250, bills:[{l:'GROCERIES + GAS + TOBACCO (weekly)',a:350}]},
-{date:'2026-12-31', source:'Quest Diagnostics (Shannon)', amount:1300, bills:[], note:'builds balance — no bills due from this check'},
-];
-function renderPaydayChecklist(){
+{date:"2026-07-02", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"LOT RENT",a:670},{l:"WATER",a:85},{l:"INTERNET",a:85},{l:"AMAZON",a:8},{l:"CONSUMERS - Arrears Plan",a:82.82}]},
+{date:"2026-07-03", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-07-10", source:"Burkland (Ryan)", amount:250, bills:[]},
+{date:"2026-07-10", source:"SSI - Children", amount:1700, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"ORTHODONTIST",a:275},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 1 of 2",a:236.0},{l:"SPECTRUM",a:20},{l:"DISNEY/HULU",a:8},{l:"CLAUDE",a:20},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 2 of 2",a:236.0},{l:"MORTGAGE",a:678},{l:"CONSUMERS - Arrears Plan",a:82.82}]},
+{date:"2026-07-16", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"LAWYER",a:150},{l:"STORAGE",a:195},{l:"NETFLIX",a:29},{l:"VERIZON",a:460},{l:"CAR INSURANCE",a:182},{l:"VARIABLE SPENDING (flex weekly bundle)",a:236.0},{l:"PARAMOUNT",a:5}]},
+{date:"2026-07-17", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-07-20", source:"Chuck Caretaking (Shannon)", amount:900, bills:[{l:"HBO",a:8},{l:"GOOGLE",a:3},{l:"CONSUMERS",a:400},{l:"PLAYSTATION",a:12},{l:"DISCOVERY PLUS",a:4},{l:"VARIABLE SPENDING (flex weekly bundle)",a:236.0},{l:"HP INK",a:21},{l:"AMC",a:3},{l:"PEACOCK",a:6},{l:"YOUTUBE PREMIUM",a:29}]},
+{date:"2026-07-24", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"CONSUMERS - Arrears Plan",a:82.82}]},
+{date:"2026-07-30", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"LAWYER",a:150},{l:"RING",a:20}]},
+{date:"2026-07-31", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"LOT RENT",a:670},{l:"WATER",a:85},{l:"INTERNET",a:85}]},
+{date:"2026-08-07", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"CONSUMERS - Arrears Plan",a:82.82}]},
+{date:"2026-08-13", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"LAWYER",a:150},{l:"MICROSOFT",a:25},{l:"SPOTIFY",a:22},{l:"PRIME VIDEO",a:6},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 1 of 2",a:236.0},{l:"AMAZON",a:8},{l:"ORTHODONTIST",a:275},{l:"KRATOM",a:60},{l:"SPECTRUM",a:20},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 2 of 2",a:300},{l:"DISNEY/HULU",a:8},{l:"CLAUDE",a:20}]},
+{date:"2026-08-14", source:"Burkland (Ryan)", amount:250, bills:[]},
+{date:"2026-08-14", source:"SSI - Children", amount:1700, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"VARIABLE SPENDING (flex weekly bundle)",a:300},{l:"MORTGAGE",a:678},{l:"STORAGE",a:195},{l:"NETFLIX",a:29},{l:"VERIZON",a:270},{l:"CAR INSURANCE",a:100},{l:"PARAMOUNT",a:5},{l:"HBO",a:8},{l:"GOOGLE",a:3}]},
+{date:"2026-08-20", source:"Chuck Caretaking (Shannon)", amount:900, bills:[{l:"VARIABLE SPENDING (flex weekly bundle)",a:300},{l:"CONSUMERS",a:400},{l:"PLAYSTATION",a:12},{l:"DISCOVERY PLUS",a:4},{l:"HP INK",a:21},{l:"AMC",a:3},{l:"PEACOCK",a:6},{l:"YOUTUBE PREMIUM",a:29},{l:"RING",a:20},{l:"MICROSOFT",a:25},{l:"SPOTIFY",a:22}]},
+{date:"2026-08-21", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"CONSUMERS - Arrears Plan",a:82.83}]},
+{date:"2026-08-27", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"LAWYER",a:150}]},
+{date:"2026-08-28", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"LOT RENT",a:670},{l:"WATER",a:85},{l:"INTERNET",a:85}]},
+{date:"2026-09-04", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-09-10", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"LAWYER",a:150},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 1 of 3",a:300},{l:"PRIME VIDEO",a:6},{l:"AMAZON",a:8},{l:"ORTHODONTIST",a:275},{l:"KRATOM",a:60},{l:"SPECTRUM",a:20},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 2 of 3",a:300},{l:"DISNEY/HULU",a:8},{l:"CLAUDE",a:20},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 3 of 3",a:300}]},
+{date:"2026-09-11", source:"Burkland (Ryan)", amount:250, bills:[]},
+{date:"2026-09-11", source:"SSI - Children", amount:1700, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"MORTGAGE",a:575},{l:"STORAGE",a:195},{l:"NETFLIX",a:29},{l:"VERIZON",a:370},{l:"CAR INSURANCE",a:100},{l:"PARAMOUNT",a:5},{l:"HBO",a:8}]},
+{date:"2026-09-18", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-09-20", source:"Chuck Caretaking (Shannon)", amount:900, bills:[{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 1 of 2",a:300},{l:"GOOGLE",a:3},{l:"CONSUMERS",a:400},{l:"PLAYSTATION",a:12},{l:"DISCOVERY PLUS",a:4},{l:"HP INK",a:21},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 2 of 2",a:300},{l:"AMC",a:3},{l:"PEACOCK",a:6},{l:"YOUTUBE PREMIUM",a:29},{l:"RING",a:20},{l:"MICROSOFT",a:25},{l:"SPOTIFY",a:22}]},
+{date:"2026-09-24", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"PRIME VIDEO",a:6},{l:"AMAZON",a:8},{l:"Mortgage Arrears Extra Payment",a:36.5}]},
+{date:"2026-09-25", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"LOT RENT",a:670},{l:"WATER",a:85},{l:"INTERNET",a:85}]},
+{date:"2026-10-02", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-10-08", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"ORTHODONTIST",a:275},{l:"KRATOM",a:60},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 1 of 2",a:300},{l:"SPECTRUM",a:20},{l:"DISNEY/HULU",a:8},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 2 of 2",a:300},{l:"CLAUDE",a:20}]},
+{date:"2026-10-09", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-10-16", source:"Burkland (Ryan)", amount:250, bills:[]},
+{date:"2026-10-16", source:"SSI - Children", amount:1700, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"MORTGAGE",a:575},{l:"STORAGE",a:195},{l:"VARIABLE SPENDING (flex weekly bundle)",a:300},{l:"NETFLIX",a:29},{l:"VERIZON",a:370},{l:"CAR INSURANCE",a:100},{l:"PARAMOUNT",a:5},{l:"HBO",a:8},{l:"GOOGLE",a:3},{l:"CONSUMERS",a:400}]},
+{date:"2026-10-20", source:"Chuck Caretaking (Shannon)", amount:900, bills:[{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 1 of 2",a:300},{l:"PLAYSTATION",a:12},{l:"DISCOVERY PLUS",a:4},{l:"HP INK",a:21},{l:"AMC",a:3},{l:"PEACOCK",a:6},{l:"YOUTUBE PREMIUM",a:29},{l:"RING",a:20},{l:"MICROSOFT",a:25},{l:"SPOTIFY",a:22},{l:"PRIME VIDEO",a:6},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 2 of 2",a:300},{l:"AMAZON",a:8}]},
+{date:"2026-10-22", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"ORTHODONTIST",a:275},{l:"KRATOM",a:60},{l:"SPECTRUM",a:20}]},
+{date:"2026-10-23", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-10-30", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"LOT RENT",a:670},{l:"WATER",a:85},{l:"INTERNET",a:85}]},
+{date:"2026-11-05", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 1 of 2",a:300},{l:"DISNEY/HULU",a:8},{l:"CLAUDE",a:20},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 2 of 2",a:300},{l:"MORTGAGE",a:575}]},
+{date:"2026-11-06", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-11-13", source:"Burkland (Ryan)", amount:250, bills:[]},
+{date:"2026-11-13", source:"SSI - Children", amount:1700, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"STORAGE",a:195},{l:"NETFLIX",a:29},{l:"VERIZON",a:370},{l:"CAR INSURANCE",a:100},{l:"PARAMOUNT",a:5},{l:"HBO",a:8},{l:"GOOGLE",a:3},{l:"VARIABLE SPENDING (flex weekly bundle)",a:300},{l:"CONSUMERS",a:400},{l:"PLAYSTATION",a:12},{l:"DISCOVERY PLUS",a:4},{l:"HP INK",a:21},{l:"AMC",a:3},{l:"PEACOCK",a:6},{l:"YOUTUBE PREMIUM",a:29},{l:"RING",a:20}]},
+{date:"2026-11-19", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 1 of 3",a:300},{l:"MICROSOFT",a:25},{l:"SPOTIFY",a:22},{l:"PRIME VIDEO",a:6},{l:"AMAZON",a:8},{l:"ORTHODONTIST",a:275},{l:"KRATOM",a:60},{l:"SPECTRUM",a:20},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 2 of 3",a:300},{l:"DISNEY/HULU",a:8},{l:"CLAUDE",a:20},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 3 of 3",a:300}]},
+{date:"2026-11-20", source:"Burkland (Ryan)", amount:250, bills:[]},
+{date:"2026-11-20", source:"Chuck Caretaking (Shannon)", amount:900, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-11-27", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"LOT RENT",a:670},{l:"WATER",a:85},{l:"INTERNET",a:85}]},
+{date:"2026-12-03", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"MORTGAGE",a:575},{l:"STORAGE",a:195},{l:"NETFLIX",a:29},{l:"VERIZON",a:370},{l:"Mortgage Arrears Extra Payment",a:31.0}]},
+{date:"2026-12-04", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-12-11", source:"Burkland (Ryan)", amount:250, bills:[]},
+{date:"2026-12-11", source:"SSI - Children", amount:1700, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350},{l:"CAR INSURANCE",a:100},{l:"PARAMOUNT",a:5},{l:"HBO",a:8},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 1 of 2",a:300},{l:"GOOGLE",a:3},{l:"CONSUMERS",a:400},{l:"PLAYSTATION",a:12},{l:"DISCOVERY PLUS",a:4},{l:"HP INK",a:21},{l:"VARIABLE SPENDING (flex weekly bundle) \u2013 week 2 of 2",a:300},{l:"AMC",a:3},{l:"PEACOCK",a:6},{l:"YOUTUBE PREMIUM",a:29},{l:"RING",a:20},{l:"MICROSOFT",a:25},{l:"SPOTIFY",a:22},{l:"PRIME VIDEO",a:6},{l:"Mortgage Arrears Extra Payment",a:336.0}]},
+{date:"2026-12-17", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"ORTHODONTIST",a:275},{l:"SPECTRUM",a:20},{l:"DISNEY/HULU",a:8},{l:"CLAUDE",a:20},{l:"AMAZON",a:8},{l:"KRATOM",a:60},{l:"Mortgage Arrears Extra Payment",a:561.5},{l:"Orthodontist Arrears Extra Payment",a:247.5}]},
+{date:"2026-12-18", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-12-20", source:"Chuck Caretaking (Shannon)", amount:900, bills:[{l:"Orthodontist Arrears Extra Payment",a:152.5}]},
+{date:"2026-12-25", source:"Burkland (Ryan)", amount:250, bills:[{l:"GROCERIES + GAS + TOBACCO (weekly)",a:350}]},
+{date:"2026-12-31", source:"Quest Diagnostics (Shannon)", amount:1300, bills:[{l:"Mortgage Arrears Extra Payment",a:391}]},
+];function renderPaydayChecklist(){
   const host = document.getElementById('paydayPlanHost');
   if(!host) return;
   const today = dateOnly(new Date());
@@ -1743,7 +1737,7 @@ function renderPaydayPlan(){
    ============================================================ */
 const DEBTS = [
   { key:'mortgage', label:'Mortgage Arrears', target:1356 },
-  { key:'consumers', label:'Consumers Energy', target:502.93 },
+  { key:'consumers', label:'Consumers Energy', target:414.11 },
   { key:'ortho', label:'Orthodontist', target:400 },
   { key:'sparrow', label:'Sparrow Credit Card', target:336.96, note:'⚠️ Ask attorney first — opened after bankruptcy filing, likely not covered. Do not pay without asking your attorney first.' }
 ];
