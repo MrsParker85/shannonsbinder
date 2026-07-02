@@ -329,6 +329,58 @@ label{ font-size:.78rem; font-weight:600; color:var(--ink-soft); text-transform:
 }
 
 .checklist{ list-style:none; margin:0; padding:0; }
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:4px;
+}
+.cal-weekdays{ margin-bottom:6px; }
+.cal-weekday{
+  text-align:center;
+  font-size:11px;
+  font-weight:600;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  padding:2px 0;
+}
+.cal-cell{
+  min-height:78px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:4px;
+  background:var(--white);
+  overflow:hidden;
+}
+.cal-cell.cal-empty{ border:none; background:transparent; }
+.cal-cell.cal-today{ background:var(--clay-light); border-color:var(--clay); }
+.cal-daynum{
+  font-size:11px;
+  font-weight:600;
+  color:var(--ink-soft);
+  margin-bottom:3px;
+}
+.cal-today .cal-daynum{ color:var(--clay); }
+.cal-appt{
+  font-size:11px;
+  line-height:1.3;
+  background:var(--clay-light);
+  border-radius:4px;
+  padding:2px 4px;
+  margin-bottom:2px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+@media (max-width:640px){
+  .cal-cell{ min-height:52px; }
+  .cal-weekday{ font-size:9px; }
+  .cal-appt{ font-size:9px; }
+}
+@media print{
+  .cal-cell{ min-height:60px; }
+  .cal-appt{ white-space:normal; }
+}
 .checklist li{
   display:flex;
   align-items:flex-start;
@@ -1438,6 +1490,17 @@ table.ledger tr:last-child td{ border-bottom:none; }
       <p class="muted" style="margin:0;">Download a single appointment any time from its card, or grab everything upcoming at once — works with Google Calendar, Cozi, and most other calendar apps.</p>
       <button class="small-btn" id="exportAllApptsBtn">⬇ Export all upcoming (.ics)</button>
     </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="flex-between no-print" style="margin-bottom:12px;">
+        <button class="small-btn" id="apptCalPrevBtn">← Prev</button>
+        <h3 id="apptCalLabel" style="margin:0;"></h3>
+        <button class="small-btn" id="apptCalNextBtn">Next →</button>
+      </div>
+      <div id="apptCalendarHost"></div>
+    </div>
+
+    <div class="section-label">Appointment details</div>
     <div id="apptCards"></div>
   </div>
 </section>
@@ -2883,10 +2946,67 @@ function downloadICSFile(filename, content){
    APPOINTMENTS & CALENDAR HUB
    ============================================================ */
 let apptDraft = newAppt();
+let apptCalDate = dateOnly(new Date());
+apptCalDate.setDate(1);
 function initAppointments(){
   if(!Array.isArray(store.appointments)) store.appointments = [];
   renderApptCards();
+  renderApptCalendar();
   document.getElementById('exportAllApptsBtn').addEventListener('click', exportAllAppointments);
+  document.getElementById('apptCalPrevBtn').addEventListener('click', ()=>{
+    apptCalDate = new Date(apptCalDate.getFullYear(), apptCalDate.getMonth()-1, 1);
+    renderApptCalendar();
+  });
+  document.getElementById('apptCalNextBtn').addEventListener('click', ()=>{
+    apptCalDate = new Date(apptCalDate.getFullYear(), apptCalDate.getMonth()+1, 1);
+    renderApptCalendar();
+  });
+}
+function renderApptCalendar(){
+  const label = document.getElementById('apptCalLabel');
+  const host = document.getElementById('apptCalendarHost');
+  if(!host) return;
+  const year = apptCalDate.getFullYear(), month = apptCalDate.getMonth();
+  if(label) label.textContent = apptCalDate.toLocaleDateString('en-US',{month:'long', year:'numeric'});
+
+  const startWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayStr = dateOnly(new Date()).toISOString().slice(0,10);
+
+  const byDate = {};
+  (store.appointments||[]).forEach(a=>{
+    if(!a.date) return;
+    const d = new Date(a.date+'T00:00:00');
+    if(d.getFullYear()===year && d.getMonth()===month){
+      const key = a.date;
+      if(!byDate[key]) byDate[key] = [];
+      byDate[key].push(a);
+    }
+  });
+
+  let cells = '';
+  for(let i=0;i<startWeekday;i++) cells += '<div class="cal-cell cal-empty"></div>';
+  for(let day=1; day<=daysInMonth; day++){
+    const dateStr = year+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    const isToday = dateStr===todayStr;
+    const items = byDate[dateStr] || [];
+    cells +=
+      '<div class="cal-cell'+(isToday?' cal-today':'')+'">'+
+        '<div class="cal-daynum">'+day+'</div>'+
+        items.map(a=>(
+          '<div class="cal-appt" title="'+(a.title||'').replace(/"/g,'&quot;')+(a.time?' at '+a.time:'')+'">'+
+            (a.time ? '<span class="mono muted" style="font-size:10px;">'+a.time+'</span> ' : '')+
+            (a.title || 'Untitled')+
+          '</div>'
+        )).join('')+
+      '</div>';
+  }
+
+  host.innerHTML =
+    '<div class="cal-grid cal-weekdays">'+
+      ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(w=>'<div class="cal-weekday">'+w+'</div>').join('')+
+    '</div>'+
+    '<div class="cal-grid">'+cells+'</div>';
 }
 function newAppt(){
   return { id:Date.now()+Math.random(), who:'', title:'', date:'', time:'', location:'', notes:'' };
@@ -2953,7 +3073,7 @@ function renderApptCards(){
   const syncDraftPrintClass = ()=> draftWrap.classList.toggle('no-print', !apptHasContent(apptDraft));
   draftWrap.querySelectorAll('[data-field]').forEach(el=>{
     const evt = (el.tagName==='SELECT' || el.type==='date' || el.type==='time') ? 'change' : 'input';
-    el.addEventListener(evt, ()=>{ apptDraft[el.dataset.field] = el.value; syncDraftPrintClass(); });
+    el.addEventListener(evt, ()=>{ apptDraft[el.dataset.field] = el.value; syncDraftPrintClass(); renderApptCalendar(); });
   });
   document.getElementById('saveApptDraftBtn').addEventListener('click', ()=>{
     if(!apptDraft.title){
@@ -2965,17 +3085,18 @@ function renderApptCards(){
     saveStore();
     apptDraft = newAppt();
     renderApptCards();
+    renderApptCalendar();
   });
 
   host.querySelectorAll('.card[data-ai]').forEach(card=>{
     const ai = Number(card.dataset.ai);
     card.querySelectorAll('[data-field]').forEach(el=>{
       const evt = (el.tagName==='SELECT' || el.type==='date' || el.type==='time') ? 'change' : 'input';
-      el.addEventListener(evt, ()=>{ store.appointments[ai][el.dataset.field] = el.value; saveStore(); });
+      el.addEventListener(evt, ()=>{ store.appointments[ai][el.dataset.field] = el.value; saveStore(); renderApptCalendar(); });
     });
     const delBtn = card.querySelector('[data-del-appt]');
     if(delBtn) delBtn.addEventListener('click', ()=>{
-      store.appointments.splice(ai,1); saveStore(); renderApptCards();
+      store.appointments.splice(ai,1); saveStore(); renderApptCards(); renderApptCalendar();
     });
     const icsBtn = card.querySelector('[data-ics-single]');
     if(icsBtn) icsBtn.addEventListener('click', ()=>{
