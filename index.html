@@ -517,6 +517,7 @@ table.ledger tr:last-child td{ border-bottom:none; }
   z-index:200;
 }
 .save-pill.show{ opacity:1; transform:translateY(0); }
+.save-pill.sync-warn{ background:var(--clay, #b5654a); }
 
 /* ============================================================
    HERO STAMP (Dashboard signature element)
@@ -893,6 +894,14 @@ table.ledger tr:last-child td{ border-bottom:none; }
 
   <div class="page-body">
     <div class="note-strip moss">Treat these as non-negotiable. No rescheduling unless absolutely necessary.</div>
+
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+        <h3 style="margin:0;">Medication Tracker</h3>
+        <span class="muted" id="medTodayLabel" style="font-size:.85rem;"></span>
+      </div>
+      <div id="medRows"></div>
+    </div>
 
     <div class="grid-2">
       <div class="card">
@@ -2363,10 +2372,78 @@ function isoWeekNumber(d){
   const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
   return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
 }
+/* ============================================================
+   MEDICATION TRACKER — list of meds + per-day taken checkbox
+   ============================================================ */
+function medTodayKey(){ return new Date().toISOString().slice(0,10); }
+function initMedTracker(){
+  if(!Array.isArray(store.medications)) store.medications = [];
+  if(!store.medTakenLog || typeof store.medTakenLog !== 'object') store.medTakenLog = {};
+  const label = document.getElementById('medTodayLabel');
+  if(label) label.textContent = 'Today · ' + new Date().toLocaleDateString('en-US',{weekday:'long', month:'short', day:'numeric'});
+  renderMedRows();
+}
+function renderMedRows(){
+  const host = document.getElementById('medRows');
+  if(!host) return;
+  const todayKey = medTodayKey();
+  if(!store.medTakenLog[todayKey]) store.medTakenLog[todayKey] = {};
+
+  host.innerHTML = store.medications.map((m,mi)=>{
+    const taken = !!store.medTakenLog[todayKey][m.id];
+    return (
+      '<div class="field" data-mi="'+mi+'" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 0; border-bottom:1px solid var(--line, #e5e0d8);">'+
+        '<label class="no-print" style="display:flex; align-items:center; gap:8px; text-transform:none; font-weight:400; color:var(--ink); margin:0;">'+
+          '<input type="checkbox" data-med-taken style="width:18px;height:18px;" '+(taken?'checked':'')+'>'+
+        '</label>'+
+        '<input type="text" data-med-field="name" placeholder="Medication name" value="'+(m.name||'').replace(/"/g,'&quot;')+'" style="flex:2; min-width:140px;">'+
+        '<input type="text" data-med-field="dose" placeholder="Dose (e.g. 20mg)" value="'+(m.dose||'').replace(/"/g,'&quot;')+'" style="flex:1; min-width:100px;">'+
+        '<input type="text" data-med-field="time" placeholder="When (e.g. AM, 8pm)" value="'+(m.time||'').replace(/"/g,'&quot;')+'" style="flex:1; min-width:100px;">'+
+        '<button class="small-btn danger no-print" data-med-remove>✕</button>'+
+      '</div>'
+    );
+  }).join('') +
+  '<div class="no-print" style="margin-top:12px;">'+
+    '<button class="small-btn" id="medAddBtn">+ Add medication</button>'+
+  '</div>';
+
+  host.querySelectorAll('[data-mi]').forEach(row=>{
+    const mi = Number(row.dataset.mi);
+    row.querySelectorAll('[data-med-field]').forEach(el=>{
+      el.addEventListener('input', ()=>{
+        store.medications[mi][el.dataset.medField] = el.value;
+        saveStore();
+      });
+    });
+    const takenBox = row.querySelector('[data-med-taken]');
+    if(takenBox) takenBox.addEventListener('change', ()=>{
+      const id = store.medications[mi].id;
+      store.medTakenLog[todayKey][id] = takenBox.checked;
+      saveStore();
+    });
+    const removeBtn = row.querySelector('[data-med-remove]');
+    if(removeBtn) removeBtn.addEventListener('click', ()=>{
+      store.medications.splice(mi,1);
+      saveStore();
+      renderMedRows();
+    });
+  });
+
+  const addBtn = document.getElementById('medAddBtn');
+  if(addBtn) addBtn.addEventListener('click', ()=>{
+    store.medications.push({ id:'med'+Date.now(), name:'', dose:'', time:'' });
+    saveStore();
+    renderMedRows();
+  });
+}
+
 function initMentalHealth(){
   const el = document.getElementById('mhJournalPrompt');
   if(el) el.textContent = MH_PROMPTS[isoWeekNumber(new Date()) % MH_PROMPTS.length];
+  initMedTracker();
 }
+
+
 
 /* ============================================================
    PURPOSE & VISION — monthly reflection prompt
@@ -3293,9 +3370,17 @@ async function pushToCloud(){
   if(!currentUser) return;
   try{
     await setDoc(userDocRef(currentUser.uid), getStoreSnapshot(), { merge: true });
+    setSyncStatus(true);
   } catch(err){
     console.warn('Cloud sync failed. Your data is still saved on this device and will retry on the next change.', err);
+    setSyncStatus(false);
   }
+}
+function setSyncStatus(ok){
+  const pill = document.getElementById('savePill');
+  if(!pill) return;
+  if(ok){ pill.textContent = 'Saved'; pill.classList.remove('sync-warn'); }
+  else { pill.textContent = 'Saved on device — not synced to cloud'; pill.classList.add('sync-warn'); pill.classList.add('show'); }
 }
 function debouncedCloudPush(){
   clearTimeout(cloudSaveTimer);
@@ -3329,13 +3414,14 @@ async function loadAndStartBinder(user){
   const localData = loadStore();
   const cloudTime = (cloudData && cloudData._updatedAt) || 0;
   const localTime = (localData && localData._updatedAt) || 0;
-  if(cloudData && cloudTime >= localTime){
+  if(localData && Object.keys(localData).length && localTime >= cloudTime){
+    setStoreSnapshot(localData);
+    pushToCloud(); // this device had the newer (or tied) copy — push it up now
+  } else if(cloudData){
     setStoreSnapshot(cloudData);
   } else if(localData && Object.keys(localData).length){
     setStoreSnapshot(localData);
-    pushToCloud(); // this device had the newer copy — push it up now
-  } else if(cloudData){
-    setStoreSnapshot(cloudData);
+    pushToCloud();
   } else {
     setStoreSnapshot({});
   }
