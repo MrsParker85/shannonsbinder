@@ -1572,6 +1572,7 @@ function loadStore(){
   catch(e){ return {}; }
 }
 function saveStore(){
+  store._updatedAt = Date.now();
   localStorage.setItem(STORE_KEY, JSON.stringify(store));
   flashSaved();
   if(window.__cloudSync) window.__cloudSync();
@@ -3422,7 +3423,7 @@ async function pushToCloud(){
 }
 function debouncedCloudPush(){
   clearTimeout(cloudSaveTimer);
-  cloudSaveTimer = setTimeout(pushToCloud, 1200);
+  cloudSaveTimer = setTimeout(pushToCloud, 300);
 }
 
 function withTimeout(promise, ms){
@@ -3450,11 +3451,15 @@ async function loadAndStartBinder(user){
     cloudData = result.value.data();
   }
   const localData = loadStore();
-  if(cloudData && Object.keys(cloudData).length){
+  const cloudTime = (cloudData && cloudData._updatedAt) || 0;
+  const localTime = (localData && localData._updatedAt) || 0;
+  if(cloudData && cloudTime >= localTime){
     setStoreSnapshot(cloudData);
   } else if(localData && Object.keys(localData).length){
     setStoreSnapshot(localData);
-    pushToCloud(); // first-time migration of this device's local data up to the cloud
+    pushToCloud(); // this device had the newer copy — push it up now
+  } else if(cloudData){
+    setStoreSnapshot(cloudData);
   } else {
     setStoreSnapshot({});
   }
