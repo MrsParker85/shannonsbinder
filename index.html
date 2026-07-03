@@ -625,7 +625,6 @@ table.ledger tr:last-child td{ border-bottom:none; }
     <button class="tab-btn" data-target="sobriety" style="--tab-color:var(--moss)"><span class="tab-num">03</span> Sobriety &amp; Coping</button>
     <button class="tab-btn" data-target="mentalhealth" style="--tab-color:var(--moss)"><span class="tab-num">04</span> Mental Health Hub</button>
     <button class="tab-btn" data-target="purpose" style="--tab-color:var(--rose)"><span class="tab-num">11</span> Purpose &amp; Vision</button>
-    <button class="tab-btn" data-target="challenge" style="--tab-color:var(--gold)"><span class="tab-num">08</span> 30-Day Rebuild</button>
     <button class="tab-btn" data-target="dates" style="--tab-color:var(--rose)"><span class="tab-num">12</span> Important Dates</button>
     <button class="tab-btn" data-target="gifts" style="--tab-color:var(--rose)"><span class="tab-num">13</span> Gift List</button>
     <button class="tab-btn" data-target="contacts" style="--tab-color:var(--rose)"><span class="tab-num">14</span> Contact Cards</button>
@@ -654,8 +653,6 @@ table.ledger tr:last-child td{ border-bottom:none; }
         </div>
         <div>
           <div class="muted" id="dashTodayDate" style="font-weight:600; color:var(--ink); font-size:1rem;"></div>
-          <div class="muted" id="dashChallengeDay" style="margin-top:4px;"></div>
-          <div class="muted" id="dashTheme" style="margin-top:2px; font-weight:600; color:var(--moss);"></div>
         </div>
       </div>
     </div>
@@ -1127,25 +1124,6 @@ table.ledger tr:last-child td{ border-bottom:none; }
     <div class="note-strip clay">
       <strong>What to avoid:</strong> Credit repair companies · Buy-here-pay-here car lots · Payday loans · Applying everywhere
     </div>
-  </div>
-</section>
-<section id="challenge" class="page" style="--accent:var(--gold)">
-  <div class="page-header">
-    <div>
-      <span class="page-eyebrow">Section 08 · Daily · Checkboxes saved on this device</span>
-      <h1>30-Day Life Rebuild</h1>
-      <p class="page-sub">June 17 – July 16, 2026. One day at a time.</p>
-    </div>
-    <button class="print-btn no-print" data-print="challenge">🖨 Print this page</button>
-  </div>
-
-  <div class="page-body">
-    <div class="note-strip" style="margin-bottom:18px;">
-      ♡ Mental Health &nbsp;·&nbsp; ✎ Productivity &nbsp;·&nbsp; ★ Purpose &nbsp;·&nbsp; ⌂ Environment &nbsp;·&nbsp; ☺ Relationships
-    </div>
-
-    <div class="pill-row no-print" id="challengeWeekTabs" style="margin-bottom:18px;"></div>
-    <div id="challengeDays"></div>
   </div>
 </section>
 <section id="homereset" class="page" style="--accent:var(--clay)">
@@ -1963,8 +1941,6 @@ function initFinancial(){
 /* ============================================================
    DASHBOARD
    ============================================================ */
-const CHALLENGE_START = new Date(2026,5,17); // June 17, 2026
-
 function dayOfYear(d){
   const start = new Date(d.getFullYear(),0,0);
   return Math.floor((d - start)/DAY_MS);
@@ -1972,21 +1948,6 @@ function dayOfYear(d){
 function initDashboard(){
   const today = new Date();
   document.getElementById('dashTodayDate').textContent = fmtDate(today);
-
-  const dayNum = daysBetween(CHALLENGE_START, today) + 1;
-  const challengeEl = document.getElementById('dashChallengeDay');
-  const themeEl = document.getElementById('dashTheme');
-  if(dayNum >= 1 && dayNum <= 30 && typeof DAYS !== 'undefined'){
-    const d = DAYS[dayNum-1];
-    challengeEl.textContent = '30-Day Rebuild — Day '+dayNum+' of 30';
-    themeEl.textContent = d ? d.theme : '';
-  } else if(dayNum > 30){
-    challengeEl.textContent = '30-Day Rebuild — complete!';
-    themeEl.textContent = 'Whatever comes next, you already proved you can show up.';
-  } else {
-    challengeEl.textContent = '30-Day Rebuild begins June 17, 2026';
-    themeEl.textContent = '';
-  }
 
   document.getElementById('dashAffirmation').textContent = AFFIRMATIONS[dayOfYear(today) % AFFIRMATIONS.length];
 
@@ -2226,90 +2187,6 @@ function renderSobrietyGrid(){
 
 
 
-/* ============================================================
-   30-DAY LIFE REBUILD — full content + renderer
-   ============================================================ */
-const DAYS = [
-  { theme:'Launch Day', week:1, tasks:['Pick the ONE room that stresses you most — 20-min clutter reset','Send one message to a long-term friend','Write 3 sentences: "What I want my life to feel like is..."'], quote:'You don\'t have to be ready. You just have to begin.' },
-  { theme:'Build the Habit', week:1, tasks:['Use one coping tool (journal, breathe, walk, call someone)','Unsubscribe from 10 junk emails','At 9pm: write tomorrow\'s Top 3'], quote:'Small actions, done daily, change everything.' },
-  { theme:'Connect', week:1, tasks:['Reach out to one person — friend, family, or online community','Do a 20-min evening home reset','Name one thing you\'re looking forward to next week'], quote:'Connection is courage. One message counts.' },
-  { theme:'Environment Focus', week:1, tasks:['Deep clean or declutter one space — pick one room','Take a 15-minute walk or step outside','Unsubscribe from 10 more junk emails','Reflect: what felt easier this week than last week?'], quote:'Your space shapes your mind. Protect both.' },
-  { theme:'Sunday Reset', week:1, tasks:['Complete the Home Reset Sunday checklist (Section 09)','Write Top 3 goals for the coming week','Review therapy/psychiatry appointments — confirm or schedule','Plan meals for the week','Name your biggest stressor + write one coping plan for it'], quote:'Reset doesn\'t mean perfect. It means ready.' },
-  { theme:'Job Search Monday', week:1, tasks:['Send or prepare 1 job application','Review budget/bills per the Financial Command Center'], quote:'Every application is a vote for the future you want.' },
-  { theme:'Week 1 Reflection', week:1, milestone:7, tasks:['Reflect: what went well this week? What was hardest?','Name 3 things that light you up','Do a 20-min home reset','Send one appreciative message to someone in your life'], quote:'One week in. You showed up. That matters.' },
-  { theme:'Digital Clean-Up', week:2, tasks:['Unsubscribe from 10 junk emails','Organize one folder or inbox — delete or file 20 items','Use your AI planning tool for today\'s Top 3'], quote:'A cleaner digital space leads to a clearer mind.' },
-  { theme:'Therapy Prep', week:2, tasks:['Journal: name one emotional trigger from this week to bring to therapy','Confirm or attend your therapy appointment','Use one coping tool'], quote:'You don\'t have to carry it alone anymore.' },
-  { theme:'Productivity Reset', week:2, tasks:['One 25-minute focused work block — one task, timer, no interruptions','Cross off one task and say "done" out loud','Tidy one small surface (desk, counter, table)'], quote:'Done is better than perfect.' },
-  { theme:'Relationships', week:2, tasks:['Reach out to one person you\'ve been meaning to talk to','Write one sentence about a relationship you want to nurture','Do a 20-min home reset'], quote:'The right people don\'t need convincing.' },
-  { theme:'Money Check-In', week:2, tasks:['Review the Financial Command Center for this week\'s payments','Name one thing that feels lighter financially than last week','Use one coping tool if money stress shows up'], quote:'Numbers don\'t define you. They\'re just information.' },
-  { theme:'Purpose Practice', week:2, tasks:['Revisit your "what I want my life to feel like" sentence from Day 1','Name one value that matters to you right now','Step outside for 15 minutes'], quote:'Purpose isn\'t found. It\'s practiced.' },
-  { theme:'Week 2 Reflection', week:2, milestone:14, tasks:['Reflect: what\'s gotten a little easier since Day 1?','Name one thing you no longer worry about as much','Send an appreciative message to someone','Do a 20-min home reset'], quote:'Two weeks of showing up. You\'re building something.' },
-  { theme:'Payday + Purpose', week:3, tasks:['Review the Financial Command Center for today\'s payments','Revisit your Day 1 sentence — has anything shifted?','Name one thing you\'re proud of this month'], quote:'Money is a tool. You\'re learning to hold it steady.' },
-  { theme:'Connect', week:3, tasks:['Reach out to someone you\'ve been meaning to talk to','Do a 20-min home reset','Write one sentence about a relationship you want to nurture'], quote:'Connection is courage. One message still counts.' },
-  { theme:'Productivity', week:3, tasks:['One 25-minute focused work block','Send or prepare one job search task','Celebrate one completed task out loud'], quote:'Momentum is built, not found.' },
-  { theme:'Rest + Recharge', week:3, tasks:['Take time for something that genuinely rests you','Step outside','Name one thing you\'re grateful for today'], quote:'Rest is not a reward. It\'s a requirement.' },
-  { theme:'Sunday Reset', week:3, tasks:['Complete the Home Reset Sunday checklist','Write Top 3 goals for the week','Review therapy/psychiatry appointments','Plan meals for the week','Name your biggest stressor + one coping plan'], quote:'Same reset, steadier hands.' },
-  { theme:'Job Search Monday', week:3, tasks:['Send or prepare 1 job application','Review budget/bills per the Command Center'], quote:'Every application is a vote for the future you want.' },
-  { theme:'Week 3 Reflection', week:3, milestone:21, tasks:['Reflect on what\'s gotten easier','Name one thing you no longer worry about','Do a 20-min home reset','Send an appreciative message'], quote:'Three weeks. The roots are taking hold.' },
-  { theme:'Mortgage Check-In', week:4, tasks:['Review mortgage arrears progress on the Financial Command Center','Use one coping tool','Name one thing that feels lighter financially'], quote:'You\'re catching up. That\'s not behind — that\'s healing.' },
-  { theme:'Digital + Deep Clean', week:4, tasks:['Unsubscribe from 10 junk emails','Pick one Deep Clean room or block to tackle','At 9pm: write tomorrow\'s Top 3'], quote:'Small spaces, cleared one block at a time.' },
-  { theme:'Connect', week:4, tasks:['Reach out to one person','Do a 20-min home reset','Name one thing you\'re looking forward to'], quote:'Connection is courage. One message still counts.' },
-  { theme:'Purpose Check-In', week:4, tasks:['Revisit your Purpose & Vision page','Add or update one value that resonates','Step outside for 15 minutes'], quote:'Purpose isn\'t found. It\'s practiced.' },
-  { theme:'Sunday Reset', week:4, tasks:['Complete the Home Reset Sunday checklist','Write Top 3 goals for the week','Review appointments','Plan meals for the week','Name your stressor + one coping plan'], quote:'One more reset. One more ready week.' },
-  { theme:'Job Search Monday', week:4, tasks:['Send or prepare 1 job application','Review budget/bills per the Command Center'], quote:'Keep going. The right one is still ahead.' },
-  { theme:'Gratitude + Reflection', week:4, tasks:['Name 3 things you\'re grateful for','Do a 20-min home reset','Send an appreciative message'], quote:'Gratitude doesn\'t erase hard. It balances it.' },
-  { theme:'Almost There', week:4, tasks:['Use one coping tool','Reflect on how far you\'ve come since Day 1','At 9pm: write tomorrow\'s Top 3'], quote:'One more day. You\'ve done this 28 times already.' },
-  { theme:'30 Days', week:4, milestone:30, tasks:['Reflect on the whole month — what changed, what\'s next','Reread your Day 1 sentence: "What I want my life to feel like is..."','Name one new goal for the next 30 days','Celebrate — really celebrate'], quote:'30 days. You did this. What\'s next?' }
-];
-const WEEK_LABELS = { 1:'Week 1 · Jun 17–23 · Start the System', 2:'Week 2 · Jun 24–30 · Deepen the Roots', 3:'Week 3 · Jul 1–7 · Rebuild the Structure', 4:'Week 4 · Jul 8–16 · Carry It Forward' };
-let challengeActiveWeek = 1;
-
-function challengeDayDate(n){
-  const d = new Date(CHALLENGE_START);
-  d.setDate(d.getDate() + (n-1));
-  return d.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
-}
-function initChallenge(){
-  const tabHost = document.getElementById('challengeWeekTabs');
-  tabHost.innerHTML = [1,2,3,4].map(w=>(
-    '<div class="pill'+(w===challengeActiveWeek?' active':'')+'" data-week="'+w+'">Week '+w+'</div>'
-  )).join('');
-  tabHost.querySelectorAll('.pill').forEach(p=>{
-    p.addEventListener('click', ()=>{
-      challengeActiveWeek = Number(p.dataset.week);
-      tabHost.querySelectorAll('.pill').forEach(x=>x.classList.toggle('active', x===p));
-      renderChallengeDays();
-    });
-  });
-  renderChallengeDays();
-}
-function renderChallengeDays(){
-  const host = document.getElementById('challengeDays');
-  const weekDays = DAYS.map((d,i)=>({...d, n:i+1})).filter(d=>d.week===challengeActiveWeek);
-  host.innerHTML = '<h3 style="margin-bottom:14px;">'+WEEK_LABELS[challengeActiveWeek]+'</h3>' + weekDays.map(d=>{
-    const n = d.n;
-    const extra = d.tasks.map((t,ti)=>(
-      '<li><input type="checkbox" data-store="chal_d'+n+'_t'+ti+'" id="chal_d'+n+'_t'+ti+'"><label for="chal_d'+n+'_t'+ti+'">'+t+'</label></li>'
-    )).join('');
-    const milestoneTag = d.milestone ? '<span class="badge done" style="margin-left:8px;">🎉 '+d.milestone+' days</span>' : '';
-    return (
-      '<div class="card">'+
-        '<div class="flex-between" style="margin-bottom:8px;">'+
-          '<h4 style="margin:0;">Day '+n+' — '+d.theme+milestoneTag+'</h4>'+
-          '<span class="muted mono" style="font-size:.78rem;">'+challengeDayDate(n)+'</span>'+
-        '</div>'+
-        '<ul class="checklist">'+
-          '<li><input type="checkbox" data-store="chal_d'+n+'_top3" id="chal_d'+n+'_top3"><label for="chal_d'+n+'_top3">♡ Write Top 3 for today</label></li>'+
-          '<li><input type="checkbox" data-store="chal_d'+n+'_checkin" id="chal_d'+n+'_checkin"><label for="chal_d'+n+'_checkin">♡ Morning + evening check-in</label></li>'+
-          '<li><input type="checkbox" data-store="chal_d'+n+'_sober" id="chal_d'+n+'_sober"><label for="chal_d'+n+'_sober">♡ Mark today as a sober day</label></li>'+
-          extra +
-        '</ul>'+
-        '<p class="quote-block" style="--accent:var(--gold); margin-top:14px; margin-bottom:0; font-size:1rem;">'+d.quote+'</p>'+
-      '</div>'
-    );
-  }).join('');
-  bindPersistentFields(host);
-}
 
 /* ============================================================
    DEEP CLEAN DAY PLANNER — full content + renderer
@@ -3356,7 +3233,6 @@ function initBinder(){
   if(typeof initSobriety==='function') initSobriety();
   if(typeof initSavings==='function') initSavings();
   if(typeof initBankruptcy==='function') initBankruptcy();
-  if(typeof initChallenge==='function') initChallenge();
   if(typeof initHomeReset==='function') initHomeReset();
   if(typeof initFinancial==='function') initFinancial();
   if(typeof initMentalHealth==='function') initMentalHealth();
