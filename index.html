@@ -1487,7 +1487,7 @@ table.ledger tr:last-child td{ border-bottom:none; }
 
   <div class="page-body">
     <div class="flex-between no-print" style="margin-bottom:14px; flex-wrap:wrap; gap:10px;">
-      <p class="muted" style="margin:0;">Download a single appointment any time from its card, or grab everything upcoming at once — works with Google Calendar, Cozi, and most other calendar apps.</p>
+      <p class="muted" style="margin:0;">Each appointment card has a one-click "Google Calendar" button, or download a .ics from its card — or grab everything upcoming at once. Works with Google Calendar, Cozi, and most other calendar apps.</p>
       <button class="small-btn" id="exportAllApptsBtn">⬇ Export all upcoming (.ics)</button>
     </div>
 
@@ -2933,6 +2933,32 @@ function icsFilenameFor(a){
   const slug = (a.title||'appointment').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'appointment';
   return slug+(a.date?'-'+a.date:'')+'.ics';
 }
+function gcalPad(n){ return String(n).padStart(2,'0'); }
+function gcalLocalStamp(d){
+  return d.getFullYear()+gcalPad(d.getMonth()+1)+gcalPad(d.getDate())+'T'+gcalPad(d.getHours())+gcalPad(d.getMinutes())+'00';
+}
+function buildGoogleCalUrl(a){
+  if(!a.date) return '';
+  let datesParam;
+  if(a.time){
+    const start = new Date(a.date+'T'+a.time+':00');
+    const end = new Date(start.getTime()+60*60*1000); // default 1-hour block
+    datesParam = gcalLocalStamp(start)+'/'+gcalLocalStamp(end);
+  } else {
+    const d0 = a.date.replace(/-/g,'');
+    const next = new Date(a.date+'T00:00:00'); next.setDate(next.getDate()+1);
+    const d1 = next.toISOString().slice(0,10).replace(/-/g,'');
+    datesParam = d0+'/'+d1;
+  }
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: (a.title || 'Appointment') + (a.who ? ' ('+a.who+')' : ''),
+    dates: datesParam
+  });
+  if(a.location) params.set('location', a.location);
+  if(a.notes) params.set('details', a.notes);
+  return 'https://calendar.google.com/calendar/render?'+params.toString();
+}
 function downloadICSFile(filename, content){
   const blob = new Blob([content], {type:'text/calendar;charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -3063,6 +3089,7 @@ function renderApptCards(){
         apptWhoSelectHtml(a)+
         '<div class="no-print" style="display:flex; align-items:center; gap:10px;">'+
           '<button class="small-btn" data-ics-single>⬇ Add to calendar</button>'+
+          '<button class="small-btn" data-gcal-single>📅 Google Calendar</button>'+
           '<button class="small-btn danger" data-del-appt>✕ Remove</button>'+
         '</div>'+
       '</div>'+
@@ -3101,6 +3128,12 @@ function renderApptCards(){
     const icsBtn = card.querySelector('[data-ics-single]');
     if(icsBtn) icsBtn.addEventListener('click', ()=>{
       downloadICSFile(icsFilenameFor(store.appointments[ai]), buildICSCalendar([store.appointments[ai]]));
+    });
+    const gcalBtn = card.querySelector('[data-gcal-single]');
+    if(gcalBtn) gcalBtn.addEventListener('click', ()=>{
+      const appt = store.appointments[ai];
+      if(!appt.date){ alert('Add a date first — Google Calendar needs one to know when to put this.'); return; }
+      window.open(buildGoogleCalUrl(appt), '_blank', 'noopener');
     });
   });
 }
