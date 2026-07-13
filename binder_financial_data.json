@@ -1,0 +1,918 @@
+{
+  "July": {
+    "income": [
+      {
+        "date": "2026-07-16",
+        "source": "Add $ Quest Check",
+        "amount": 1000
+      },
+      {
+        "date": "2026-07-30",
+        "source": "Add $ Quest Check",
+        "amount": 1000
+      }
+    ],
+    "bills": [
+      {
+        "date": "2026-07-16",
+        "item": "Lawyer",
+        "amount": -150
+      },
+      {
+        "date": "2026-07-17",
+        "item": "Netflix",
+        "amount": -29
+      },
+      {
+        "date": "2026-07-17",
+        "item": "Car Insurance",
+        "amount": -190
+      },
+      {
+        "date": "2026-07-18",
+        "item": "Paramount Plus",
+        "amount": -5
+      },
+      {
+        "date": "2026-07-18",
+        "item": "HBO",
+        "amount": -8
+      },
+      {
+        "date": "2026-07-20",
+        "item": "Google",
+        "amount": -3
+      },
+      {
+        "date": "2026-07-22",
+        "item": "Consumers",
+        "amount": -400
+      },
+      {
+        "date": "2026-07-24",
+        "item": "Playstation Plus",
+        "amount": -12
+      },
+      {
+        "date": "2026-07-24",
+        "item": "Discovery Plus",
+        "amount": -4
+      },
+      {
+        "date": "2026-07-25",
+        "item": "HP Ink",
+        "amount": -21
+      },
+      {
+        "date": "2026-07-26",
+        "item": "AMC Plus",
+        "amount": -3
+      },
+      {
+        "date": "2026-07-26",
+        "item": "Peacock",
+        "amount": -6
+      },
+      {
+        "date": "2026-07-26",
+        "item": "Youtube Premium",
+        "amount": -29
+      },
+      {
+        "date": "2026-07-26",
+        "item": "Ring Camera",
+        "amount": -20
+      },
+      {
+        "date": "2026-07-28",
+        "item": "Microsoft",
+        "amount": -25
+      },
+      {
+        "date": "2026-07-28",
+        "item": "Spotify",
+        "amount": -22
+      },
+      {
+        "date": "2026-07-29",
+        "item": "Consumers Arrears",
+        "amount": -83.82
+      },
+      {
+        "date": "2026-07-30",
+        "item": "Lawyer",
+        "amount": -150
+      }
+    ]
+  },
+  "August": {
+    "income": [
+      {
+        "date": "2026-08-13",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-08-14",
+        "source": "Add $ SSI Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-08-20",
+        "source": "Add $ Care Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-08-27",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      }
+    ],
+    "bills": [
+      {
+        "date": "2026-08-01",
+        "item": "Lot Rent",
+        "amount": -670
+      },
+      {
+        "date": "2026-08-01",
+        "item": "Water",
+        "amount": -85
+      },
+      {
+        "date": "2026-08-01",
+        "item": "Internet",
+        "amount": -85
+      },
+      {
+        "date": "2026-08-01",
+        "item": "Amazon",
+        "amount": -8
+      },
+      {
+        "date": "2026-08-01",
+        "item": "Mortgage",
+        "amount": -550
+      },
+      {
+        "date": "2026-08-01",
+        "item": "Orthodontist",
+        "amount": -275
+      },
+      {
+        "date": "2026-08-04",
+        "item": "Spectrum",
+        "amount": -20
+      },
+      {
+        "date": "2026-08-05",
+        "item": "Claude",
+        "amount": -20
+      },
+      {
+        "date": "2026-08-08",
+        "item": "Disney/Hulu",
+        "amount": -8
+      },
+      {
+        "date": "2026-08-12",
+        "item": "Consumers Arrears",
+        "amount": -83.82
+      },
+      {
+        "date": "2026-08-13",
+        "item": "Lawyer",
+        "amount": -150
+      },
+      {
+        "date": "2026-08-15",
+        "item": "Storage",
+        "amount": -195
+      },
+      {
+        "date": "2026-08-17",
+        "item": "Verizon",
+        "amount": -265
+      },
+      {
+        "date": "2026-08-17",
+        "item": "Netflix",
+        "amount": -29
+      },
+      {
+        "date": "2026-08-17",
+        "item": "Car Insurance",
+        "amount": -100
+      },
+      {
+        "date": "2026-08-18",
+        "item": "Paramount Plus",
+        "amount": -5
+      },
+      {
+        "date": "2026-08-18",
+        "item": "HBO",
+        "amount": -8
+      },
+      {
+        "date": "2026-08-20",
+        "item": "Google",
+        "amount": -3
+      },
+      {
+        "date": "2026-08-22",
+        "item": "Consumers",
+        "amount": -400
+      },
+      {
+        "date": "2026-08-24",
+        "item": "Playstation Plus",
+        "amount": -12
+      },
+      {
+        "date": "2026-08-24",
+        "item": "Discovery Plus",
+        "amount": -4
+      },
+      {
+        "date": "2026-08-25",
+        "item": "HP Ink",
+        "amount": -21
+      },
+      {
+        "date": "2026-08-26",
+        "item": "AMC Plus",
+        "amount": -3
+      },
+      {
+        "date": "2026-08-26",
+        "item": "Peacock",
+        "amount": -6
+      },
+      {
+        "date": "2026-08-26",
+        "item": "Youtube Premium",
+        "amount": -29
+      },
+      {
+        "date": "2026-08-26",
+        "item": "Ring Camera",
+        "amount": -20
+      },
+      {
+        "date": "2026-08-26",
+        "item": "Consumers Arrears",
+        "amount": -83.83
+      },
+      {
+        "date": "2026-08-27",
+        "item": "Lawyer",
+        "amount": -150
+      },
+      {
+        "date": "2026-08-28",
+        "item": "Microsoft",
+        "amount": -25
+      },
+      {
+        "date": "2026-08-28",
+        "item": "Spotify",
+        "amount": -22
+      }
+    ]
+  },
+  "September": {
+    "income": [
+      {
+        "date": "2026-09-10",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-09-11",
+        "source": "Add $ SSI Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-09-20",
+        "source": "Add $ Care Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-09-24",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      }
+    ],
+    "bills": [
+      {
+        "date": "2026-09-01",
+        "item": "Lot Rent",
+        "amount": -670
+      },
+      {
+        "date": "2026-09-01",
+        "item": "Water",
+        "amount": -85
+      },
+      {
+        "date": "2026-09-01",
+        "item": "Internet",
+        "amount": -85
+      },
+      {
+        "date": "2026-09-01",
+        "item": "Amazon",
+        "amount": -8
+      },
+      {
+        "date": "2026-09-01",
+        "item": "Orthodontist",
+        "amount": -275
+      },
+      {
+        "date": "2026-09-01",
+        "item": "Mortgage",
+        "amount": -550
+      },
+      {
+        "date": "2026-09-04",
+        "item": "Spectrum",
+        "amount": -20
+      },
+      {
+        "date": "2026-09-05",
+        "item": "Claude",
+        "amount": -20
+      },
+      {
+        "date": "2026-09-08",
+        "item": "Disney/Hulu",
+        "amount": -8
+      },
+      {
+        "date": "2026-09-10",
+        "item": "Lawyer",
+        "amount": -150
+      },
+      {
+        "date": "2026-09-15",
+        "item": "Storage",
+        "amount": -195
+      },
+      {
+        "date": "2026-09-17",
+        "item": "Verizon",
+        "amount": -360
+      },
+      {
+        "date": "2026-09-17",
+        "item": "Netflix",
+        "amount": -29
+      },
+      {
+        "date": "2026-09-17",
+        "item": "Car Insurance",
+        "amount": -100
+      },
+      {
+        "date": "2026-09-18",
+        "item": "Paramount Plus",
+        "amount": -5
+      },
+      {
+        "date": "2026-09-18",
+        "item": "HBO",
+        "amount": -8
+      },
+      {
+        "date": "2026-09-20",
+        "item": "Google",
+        "amount": -3
+      },
+      {
+        "date": "2026-09-22",
+        "item": "Consumers",
+        "amount": -400
+      },
+      {
+        "date": "2026-09-24",
+        "item": "Playstation Plus",
+        "amount": -12
+      },
+      {
+        "date": "2026-09-24",
+        "item": "Discovery Plus",
+        "amount": -4
+      },
+      {
+        "date": "2026-09-25",
+        "item": "HP Ink",
+        "amount": -21
+      },
+      {
+        "date": "2026-09-26",
+        "item": "AMC Plus",
+        "amount": -3
+      },
+      {
+        "date": "2026-09-26",
+        "item": "Peacock",
+        "amount": -6
+      },
+      {
+        "date": "2026-09-26",
+        "item": "Youtube Premium",
+        "amount": -29
+      },
+      {
+        "date": "2026-09-26",
+        "item": "Ring Camera",
+        "amount": -20
+      },
+      {
+        "date": "2026-09-28",
+        "item": "Microsoft",
+        "amount": -25
+      },
+      {
+        "date": "2026-09-28",
+        "item": "Spotify",
+        "amount": -22
+      }
+    ]
+  },
+  "October": {
+    "income": [
+      {
+        "date": "2026-10-08",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-10-16",
+        "source": "Add $ SSI Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-10-20",
+        "source": "Add $ Care Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      }
+    ],
+    "bills": [
+      {
+        "date": "2026-10-01",
+        "item": "Lot Rent",
+        "amount": -670
+      },
+      {
+        "date": "2026-10-01",
+        "item": "Water",
+        "amount": -85
+      },
+      {
+        "date": "2026-10-01",
+        "item": "Internet",
+        "amount": -85
+      },
+      {
+        "date": "2026-10-01",
+        "item": "Amazon",
+        "amount": -8
+      },
+      {
+        "date": "2026-10-01",
+        "item": "Orthodontist",
+        "amount": -275
+      },
+      {
+        "date": "2026-10-01",
+        "item": "Mortgage",
+        "amount": -550
+      },
+      {
+        "date": "2026-10-04",
+        "item": "Spectrum",
+        "amount": -20
+      },
+      {
+        "date": "2026-10-05",
+        "item": "Claude",
+        "amount": -20
+      },
+      {
+        "date": "2026-10-08",
+        "item": "Disney/Hulu",
+        "amount": -8
+      },
+      {
+        "date": "2026-10-15",
+        "item": "Storage",
+        "amount": -195
+      },
+      {
+        "date": "2026-10-17",
+        "item": "Verizon",
+        "amount": -360
+      },
+      {
+        "date": "2026-10-17",
+        "item": "Netflix",
+        "amount": -29
+      },
+      {
+        "date": "2026-10-17",
+        "item": "Car Insurance",
+        "amount": -100
+      },
+      {
+        "date": "2026-10-18",
+        "item": "Paramount Plus",
+        "amount": -5
+      },
+      {
+        "date": "2026-10-18",
+        "item": "HBO",
+        "amount": -8
+      },
+      {
+        "date": "2026-10-20",
+        "item": "Google",
+        "amount": -3
+      },
+      {
+        "date": "2026-10-22",
+        "item": "Consumers",
+        "amount": -400
+      },
+      {
+        "date": "2026-10-24",
+        "item": "Playstation Plus",
+        "amount": -12
+      },
+      {
+        "date": "2026-10-24",
+        "item": "Discovery Plus",
+        "amount": -4
+      },
+      {
+        "date": "2026-10-25",
+        "item": "HP Ink",
+        "amount": -21
+      },
+      {
+        "date": "2026-10-26",
+        "item": "AMC Plus",
+        "amount": -3
+      },
+      {
+        "date": "2026-10-26",
+        "item": "Peacock",
+        "amount": -6
+      },
+      {
+        "date": "2026-10-26",
+        "item": "Youtube Premium",
+        "amount": -29
+      },
+      {
+        "date": "2026-10-26",
+        "item": "Ring Camera",
+        "amount": -20
+      },
+      {
+        "date": "2026-10-28",
+        "item": "Microsoft",
+        "amount": -25
+      },
+      {
+        "date": "2026-10-28",
+        "item": "Spotify",
+        "amount": -22
+      }
+    ]
+  },
+  "November": {
+    "income": [
+      {
+        "date": "2026-11-05",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-11-13",
+        "source": "Add $ SSI Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-11-19",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-11-20",
+        "source": "Add $ Care Check",
+        "amount": 900
+      }
+    ],
+    "bills": [
+      {
+        "date": "2026-11-01",
+        "item": "Lot Rent",
+        "amount": -670
+      },
+      {
+        "date": "2026-11-01",
+        "item": "Water",
+        "amount": -85
+      },
+      {
+        "date": "2026-11-01",
+        "item": "Internet",
+        "amount": -85
+      },
+      {
+        "date": "2026-11-01",
+        "item": "Amazon",
+        "amount": -8
+      },
+      {
+        "date": "2026-11-01",
+        "item": "Orthodontist",
+        "amount": -275
+      },
+      {
+        "date": "2026-11-01",
+        "item": "Mortgage",
+        "amount": -550
+      },
+      {
+        "date": "2026-11-04",
+        "item": "Spectrum",
+        "amount": -20
+      },
+      {
+        "date": "2026-11-05",
+        "item": "Claude",
+        "amount": -20
+      },
+      {
+        "date": "2026-11-08",
+        "item": "Disney/Hulu",
+        "amount": -8
+      },
+      {
+        "date": "2026-11-15",
+        "item": "Storage",
+        "amount": -195
+      },
+      {
+        "date": "2026-11-17",
+        "item": "Verizon",
+        "amount": -360
+      },
+      {
+        "date": "2026-11-17",
+        "item": "Netflix",
+        "amount": -29
+      },
+      {
+        "date": "2026-11-17",
+        "item": "Car Insurance",
+        "amount": -100
+      },
+      {
+        "date": "2026-11-18",
+        "item": "Paramount Plus",
+        "amount": -5
+      },
+      {
+        "date": "2026-11-18",
+        "item": "HBO",
+        "amount": -8
+      },
+      {
+        "date": "2026-11-20",
+        "item": "Google",
+        "amount": -3
+      },
+      {
+        "date": "2026-11-22",
+        "item": "Consumers",
+        "amount": -400
+      },
+      {
+        "date": "2026-11-24",
+        "item": "Playstation Plus",
+        "amount": -12
+      },
+      {
+        "date": "2026-11-24",
+        "item": "Discovery Plus",
+        "amount": -4
+      },
+      {
+        "date": "2026-11-25",
+        "item": "HP Ink",
+        "amount": -21
+      },
+      {
+        "date": "2026-11-26",
+        "item": "AMC Plus",
+        "amount": -3
+      },
+      {
+        "date": "2026-11-26",
+        "item": "Peacock",
+        "amount": -6
+      },
+      {
+        "date": "2026-11-26",
+        "item": "Youtube Premium",
+        "amount": -29
+      },
+      {
+        "date": "2026-11-26",
+        "item": "Ring Camera",
+        "amount": -20
+      },
+      {
+        "date": "2026-11-28",
+        "item": "Microsoft",
+        "amount": -25
+      },
+      {
+        "date": "2026-11-28",
+        "item": "Spotify",
+        "amount": -22
+      }
+    ]
+  },
+  "December": {
+    "income": [
+      {
+        "date": "2026-12-03",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-12-11",
+        "source": "Add $ SSI Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-12-17",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-12-20",
+        "source": "Add $ Care Check",
+        "amount": 900
+      },
+      {
+        "date": "2026-12-31",
+        "source": "Add $ Quest Check",
+        "amount": 900
+      }
+    ],
+    "bills": [
+      {
+        "date": "2026-12-01",
+        "item": "Lot Rent",
+        "amount": -670
+      },
+      {
+        "date": "2026-12-01",
+        "item": "Water",
+        "amount": -85
+      },
+      {
+        "date": "2026-12-01",
+        "item": "Internet",
+        "amount": -85
+      },
+      {
+        "date": "2026-12-01",
+        "item": "Amazon",
+        "amount": -8
+      },
+      {
+        "date": "2026-12-01",
+        "item": "Orthodontist",
+        "amount": -275
+      },
+      {
+        "date": "2026-12-01",
+        "item": "Mortgage",
+        "amount": -550
+      },
+      {
+        "date": "2026-12-04",
+        "item": "Spectrum",
+        "amount": -20
+      },
+      {
+        "date": "2026-12-05",
+        "item": "Claude",
+        "amount": -20
+      },
+      {
+        "date": "2026-12-08",
+        "item": "Disney/Hulu",
+        "amount": -8
+      },
+      {
+        "date": "2026-12-15",
+        "item": "Storage",
+        "amount": -195
+      },
+      {
+        "date": "2026-12-17",
+        "item": "Verizon",
+        "amount": -360
+      },
+      {
+        "date": "2026-12-17",
+        "item": "Netflix",
+        "amount": -29
+      },
+      {
+        "date": "2026-12-17",
+        "item": "Car Insurance",
+        "amount": -100
+      },
+      {
+        "date": "2026-12-18",
+        "item": "Paramount Plus",
+        "amount": -5
+      },
+      {
+        "date": "2026-12-18",
+        "item": "HBO",
+        "amount": -8
+      },
+      {
+        "date": "2026-12-20",
+        "item": "Google",
+        "amount": -3
+      },
+      {
+        "date": "2026-12-22",
+        "item": "Consumers",
+        "amount": -400
+      },
+      {
+        "date": "2026-12-24",
+        "item": "Playstation Plus",
+        "amount": -12
+      },
+      {
+        "date": "2026-12-24",
+        "item": "Discovery Plus",
+        "amount": -4
+      },
+      {
+        "date": "2026-12-25",
+        "item": "HP Ink",
+        "amount": -21
+      },
+      {
+        "date": "2026-12-26",
+        "item": "AMC Plus",
+        "amount": -3
+      },
+      {
+        "date": "2026-12-26",
+        "item": "Peacock",
+        "amount": -6
+      },
+      {
+        "date": "2026-12-26",
+        "item": "Youtube Premium",
+        "amount": -29
+      },
+      {
+        "date": "2026-12-26",
+        "item": "Ring Camera",
+        "amount": -20
+      },
+      {
+        "date": "2026-12-28",
+        "item": "Microsoft",
+        "amount": -25
+      },
+      {
+        "date": "2026-12-28",
+        "item": "Spotify",
+        "amount": -22
+      }
+    ]
+  }
+}
