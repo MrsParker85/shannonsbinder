@@ -3265,7 +3265,9 @@ const DEFAULT_SUPPLY_ITEMS_CLEANING = [
   ['Kitchen Supplies','Refrigerator Cleaner'],['Kitchen Supplies','Ice Machine Cleaner'],
   ['Floor Supplies','Laminate Cleaner'],['Floor Supplies','Carpet Steamer Solution'],['Floor Supplies','Spot Solution'],
   ['Specialty Supplies','Electronics Cleaner'],['Specialty Supplies','Disposable Gloves'],['Specialty Supplies','Face Masks'],
-  ['Specialty Supplies','Spray Bottles'],['Specialty Supplies','Funnel'],
+  ['Specialty Supplies','Spray Bottles'],['Specialty Supplies','Funnel']
+];
+const DEFAULT_SUPPLY_ITEMS_LARGE = [
   ['One-Time Purchases','Cleaning Smock'],['One-Time Purchases','Broom & Dustpan'],['One-Time Purchases','Mop & Bucket'],
   ['One-Time Purchases','Handheld Vacuum'],['One-Time Purchases','Upright Vacuum'],['One-Time Purchases','Small Trash Cans'],
   ['One-Time Purchases','Kitchen Trash Can'],['One-Time Purchases','Toilet Brush Set'],['One-Time Purchases','Squeegee'],
@@ -3305,18 +3307,23 @@ const DEFAULT_SUPPLY_ITEMS_HOUSEHOLD = [
   ['Misc / Home Maintenance','Ice Melt'],['Misc / Home Maintenance','Snow Shovel']
 ];
 function getSupplyView(){
-  return store.supplyView === 'household' ? 'household' : 'cleaning';
+  return (store.supplyView === 'household' || store.supplyView === 'large') ? store.supplyView : 'cleaning';
 }
 function activeSupplyListKey(){
-  return getSupplyView()==='household' ? 'supplyListHousehold' : 'supplyListCleaning';
+  const view = getSupplyView();
+  if(view==='household') return 'supplyListHousehold';
+  if(view==='large') return 'supplyListLarge';
+  return 'supplyListCleaning';
 }
 function renderSupplyViewToggle(){
   const host = document.getElementById('supplyViewToggleHost');
   if(!host) return;
   const view = getSupplyView();
+  const btnStyle = (v)=> v===view ? 'background:var(--accent,var(--clay));color:#fff;' : '';
   host.innerHTML =
-    '<button type="button" class="small-btn supply-view-btn" data-view="cleaning" style="'+(view==='cleaning'?'background:var(--accent,var(--clay));color:#fff;':'')+'">🧽 Cleaning Supplies</button>'+
-    '<button type="button" class="small-btn supply-view-btn" data-view="household" style="'+(view==='household'?'background:var(--accent,var(--clay));color:#fff;':'')+'">🏠 Household Supplies</button>';
+    '<button type="button" class="small-btn supply-view-btn" data-view="cleaning" style="'+btnStyle('cleaning')+'">🧽 Cleaning Supplies</button>'+
+    '<button type="button" class="small-btn supply-view-btn" data-view="household" style="'+btnStyle('household')+'">🏠 Household Supplies</button>'+
+    '<button type="button" class="small-btn supply-view-btn" data-view="large" style="'+btnStyle('large')+'">🛒 Large Purchases</button>';
   host.querySelectorAll('.supply-view-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       store.supplyView = btn.dataset.view;
@@ -3329,11 +3336,22 @@ function renderSupplyViewToggle(){
 function initSupplies(){
   if(!Array.isArray(store.supplyListCleaning)) store.supplyListCleaning = [];
   if(!Array.isArray(store.supplyListHousehold)) store.supplyListHousehold = [];
+  if(!Array.isArray(store.supplyListLarge)) store.supplyListLarge = [];
   if(!store.supplyListCleaning.length){
     store.supplyListCleaning = DEFAULT_SUPPLY_ITEMS_CLEANING.map(([category,text])=>({ id:Date.now()+Math.random(), text, category, checked:false }));
   }
   if(!store.supplyListHousehold.length){
     store.supplyListHousehold = DEFAULT_SUPPLY_ITEMS_HOUSEHOLD.map(([category,text])=>({ id:Date.now()+Math.random(), text, category, checked:false }));
+  }
+  if(!store.supplyListLarge.length){
+    // migrate any previously-seeded One-Time Purchases items out of the cleaning list; otherwise seed fresh
+    const migrated = store.supplyListCleaning.filter(i=> i.category==='One-Time Purchases');
+    if(migrated.length){
+      store.supplyListLarge = migrated;
+      store.supplyListCleaning = store.supplyListCleaning.filter(i=> i.category!=='One-Time Purchases');
+    } else {
+      store.supplyListLarge = DEFAULT_SUPPLY_ITEMS_LARGE.map(([category,text])=>({ id:Date.now()+Math.random(), text, category, checked:false }));
+    }
   }
   saveStore();
   renderSupplyViewToggle();
