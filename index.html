@@ -994,7 +994,7 @@ table.ledger tr:last-child td{ border-bottom:none; }
 
     <div class="card" id="finMilestoneCard">
       <div class="field" data-milestone="lawyer">
-        <div class="progress-row"><span>Lawyer paid off — target July 29 (frees $300/mo)</span></div>
+        <div class="progress-row"><span>Lawyer paid off — 5 payments remain, est. payoff 09/10/26 (frees $300/mo)</span></div>
         <div class="progress-track"><div class="progress-fill" id="fin-bar-lawyer" style="width:5%"></div></div>
       </div>
       <div class="field" data-milestone="savings" style="margin-bottom:0;">
@@ -1002,27 +1002,6 @@ table.ledger tr:last-child td{ border-bottom:none; }
         <div class="progress-track"><div class="progress-fill" id="fin-bar-savings" style="width:5%"></div></div>
       </div>
     </div>
-
-    <div class="section-label">September and beyond</div>
-
-    <div class="card card-tinted" style="--tint:var(--slate-light);">
-      <div class="grid-2">
-        <div>Emergency fund: <strong>$500/mo</strong></div>
-        <div>Savings: <strong>$200/mo</strong></div>
-        <div>Flex: <strong>$400/mo</strong></div>
-        <div>Fun money: <strong>$120/mo</strong></div>
-      </div>
-    </div>
-
-    <details class="card">
-      <summary style="cursor:pointer; font-weight:700;">The 4 Rules</summary>
-      <ol style="margin-top:10px; padding-left:20px;">
-        <li>Pay fixed bills first.</li>
-        <li>Move savings the same day you get paid.</li>
-        <li>Flex is not spending money.</li>
-        <li>Sunday Reset every week.</li>
-      </ol>
-    </details>
   </div>
 </section>
 <section id="savings" class="page" style="--accent:var(--slate)">
@@ -2009,7 +1988,7 @@ const MILESTONE_PCT = { urgent:5, plan:35, norush:20, warn:10, progress:55, done
 function pctFor(val){ return MILESTONE_PCT[val] !== undefined ? MILESTONE_PCT[val] : 5; }
 function renderMilestoneBars(){
   const map = {
-    lawyer: store.lawyerStatus || 'progress',
+    lawyer: store.lawyerStatus || 'urgent',
     savings: store.status_savings || 'urgent'
   };
   Object.keys(map).forEach(key=>{
