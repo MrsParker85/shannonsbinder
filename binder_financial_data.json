@@ -2,14 +2,54 @@
   "July": {
     "income": [
       {
+        "date": "2026-07-02",
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-07-02",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-07-09",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-07-10",
+        "source": "SSI - Children",
+        "amount": 1700
+      },
+      {
         "date": "2026-07-16",
-        "source": "Add $ Quest Check",
-        "amount": 1000
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-07-16",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-07-20",
+        "source": "Chuck Caretaking",
+        "amount": 900
+      },
+      {
+        "date": "2026-07-23",
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
         "date": "2026-07-30",
-        "source": "Add $ Quest Check",
-        "amount": 1000
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-07-30",
+        "source": "Burkland - Ryan",
+        "amount": 250
       }
     ],
     "bills": [
@@ -108,24 +148,44 @@
   "August": {
     "income": [
       {
-        "date": "2026-08-13",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "date": "2026-08-06",
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
-        "date": "2026-08-14",
-        "source": "Add $ SSI Check",
+        "date": "2026-08-10",
+        "source": "SSI - Children",
+        "amount": 1700
+      },
+      {
+        "date": "2026-08-13",
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-08-13",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-08-20",
+        "source": "Chuck Caretaking",
         "amount": 900
       },
       {
         "date": "2026-08-20",
-        "source": "Add $ Care Check",
-        "amount": 900
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
         "date": "2026-08-27",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-08-27",
+        "source": "Burkland - Ryan",
+        "amount": 250
       }
     ],
     "bills": [
@@ -284,24 +344,44 @@
   "September": {
     "income": [
       {
-        "date": "2026-09-10",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "date": "2026-09-03",
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
-        "date": "2026-09-11",
-        "source": "Add $ SSI Check",
-        "amount": 900
+        "date": "2026-09-10",
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-09-10",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-09-10",
+        "source": "SSI - Children",
+        "amount": 1700
+      },
+      {
+        "date": "2026-09-17",
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
         "date": "2026-09-20",
-        "source": "Add $ Care Check",
+        "source": "Chuck Caretaking",
         "amount": 900
       },
       {
         "date": "2026-09-24",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-09-24",
+        "source": "Burkland - Ryan",
+        "amount": 250
       }
     ],
     "bills": [
@@ -445,24 +525,49 @@
   "October": {
     "income": [
       {
-        "date": "2026-10-08",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "date": "2026-10-01",
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
-        "date": "2026-10-16",
-        "source": "Add $ SSI Check",
-        "amount": 900
+        "date": "2026-10-08",
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-10-08",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-10-10",
+        "source": "SSI - Children",
+        "amount": 1700
+      },
+      {
+        "date": "2026-10-15",
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
         "date": "2026-10-20",
-        "source": "Add $ Care Check",
+        "source": "Chuck Caretaking",
         "amount": 900
       },
       {
         "date": "2026-10-22",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-10-22",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-10-29",
+        "source": "Burkland - Ryan",
+        "amount": 250
       }
     ],
     "bills": [
@@ -602,23 +707,43 @@
     "income": [
       {
         "date": "2026-11-05",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "source": "Quest Diagnostics",
+        "amount": 1300
       },
       {
-        "date": "2026-11-13",
-        "source": "Add $ SSI Check",
-        "amount": 900
+        "date": "2026-11-05",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-11-10",
+        "source": "SSI - Children",
+        "amount": 1700
+      },
+      {
+        "date": "2026-11-12",
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
         "date": "2026-11-19",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-11-19",
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
         "date": "2026-11-20",
-        "source": "Add $ Care Check",
+        "source": "Chuck Caretaking",
         "amount": 900
+      },
+      {
+        "date": "2026-11-26",
+        "source": "Burkland - Ryan",
+        "amount": 250
       }
     ],
     "bills": [
@@ -758,28 +883,53 @@
     "income": [
       {
         "date": "2026-12-03",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "source": "Quest Diagnostics",
+        "amount": 1300
       },
       {
-        "date": "2026-12-11",
-        "source": "Add $ SSI Check",
-        "amount": 900
+        "date": "2026-12-03",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-12-10",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
+        "date": "2026-12-10",
+        "source": "SSI - Children",
+        "amount": 1700
       },
       {
         "date": "2026-12-17",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-12-17",
+        "source": "Burkland - Ryan",
+        "amount": 250
       },
       {
         "date": "2026-12-20",
-        "source": "Add $ Care Check",
+        "source": "Chuck Caretaking",
         "amount": 900
       },
       {
+        "date": "2026-12-24",
+        "source": "Burkland - Ryan",
+        "amount": 250
+      },
+      {
         "date": "2026-12-31",
-        "source": "Add $ Quest Check",
-        "amount": 900
+        "source": "Quest Diagnostics",
+        "amount": 1300
+      },
+      {
+        "date": "2026-12-31",
+        "source": "Burkland - Ryan",
+        "amount": 250
       }
     ],
     "bills": [
