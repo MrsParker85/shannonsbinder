@@ -1511,6 +1511,9 @@ table.ledger tr:last-child td{ border-bottom:none; }
   </div>
 
   <div class="page-body">
+    <div class="flex-between no-print" style="margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+      <div id="supplyViewToggleHost" style="display:flex; gap:6px;"></div>
+    </div>
     <div class="card">
       <div class="field-row no-print" style="align-items:flex-end;">
         <div class="field" style="margin-bottom:0;"><label>Add an item</label><input type="text" id="newSupplyInput" placeholder="e.g., paper towels"></div>
@@ -3246,15 +3249,102 @@ function renderVehicleCards(){
 /* ============================================================
    HOUSEHOLD SUPPLIES & INVENTORY
    ============================================================ */
+const DEFAULT_SUPPLY_ITEMS_CLEANING = [
+  ['General Supplies','All-Purpose Cleaner'],['General Supplies','Glass Cleaner'],['General Supplies','Disinfectant'],
+  ['General Supplies','Microfiber Cloth'],['General Supplies','Terry Cloth Towel'],['General Supplies','Paper Towel'],
+  ['General Supplies','Heavy Duty Sponge'],['General Supplies','Normal Sponge'],['General Supplies','Scrub Brush'],
+  ['General Supplies','30 Gal Trash Bags'],['General Supplies','13 Gal Trash Bags'],['General Supplies','8 Gal Trash Bags'],
+  ['General Supplies','Duster'],['General Supplies','Magic Eraser'],
+  ['Bathroom Supplies','Toilet Bowl Cleaner'],['Bathroom Supplies','Surface Cleaner'],['Bathroom Supplies','Disinfectant Wipes'],
+  ['Bathroom Supplies','Shower Cleaner'],['Bathroom Supplies','Tub Cleaner'],['Bathroom Supplies','Air Freshener (Plug-In)'],
+  ['Laundry Supplies','Detergent'],['Laundry Supplies','Dryer Sheets'],['Laundry Supplies','Scent Beads'],
+  ['Laundry Supplies','Odoban'],['Laundry Supplies','Bleach'],['Laundry Supplies','OxiClean'],['Laundry Supplies','Lint Roller'],
+  ['Kitchen Supplies','Degreaser'],['Kitchen Supplies','Stainless Cleaner'],['Kitchen Supplies','Oven Cleaner'],
+  ['Kitchen Supplies','Dish Soap'],['Kitchen Supplies','Dishwasher Soap'],['Kitchen Supplies','Rinse Aid'],
+  ['Kitchen Supplies','Dishwasher Pods'],['Kitchen Supplies','Disposal Cleaner'],['Kitchen Supplies','Dishwasher Cleaner'],
+  ['Kitchen Supplies','Refrigerator Cleaner'],['Kitchen Supplies','Ice Machine Cleaner'],
+  ['Floor Supplies','Laminate Cleaner'],['Floor Supplies','Carpet Steamer Solution'],['Floor Supplies','Spot Solution'],
+  ['Specialty Supplies','Electronics Cleaner'],['Specialty Supplies','Disposable Gloves'],['Specialty Supplies','Face Masks'],
+  ['Specialty Supplies','Spray Bottles'],['Specialty Supplies','Funnel'],
+  ['One-Time Purchases','Cleaning Smock'],['One-Time Purchases','Broom & Dustpan'],['One-Time Purchases','Mop & Bucket'],
+  ['One-Time Purchases','Handheld Vacuum'],['One-Time Purchases','Upright Vacuum'],['One-Time Purchases','Small Trash Cans'],
+  ['One-Time Purchases','Kitchen Trash Can'],['One-Time Purchases','Toilet Brush Set'],['One-Time Purchases','Squeegee'],
+  ['One-Time Purchases','Label Maker'],['One-Time Purchases','Cleaning Caddy'],['One-Time Purchases','Step Ladder'],
+  ['One-Time Purchases','Carpet Steam Cleaner'],['One-Time Purchases','Carpet Spot Bot']
+];
+const DEFAULT_SUPPLY_ITEMS_HOUSEHOLD = [
+  ['Kitchen Supplies','Parchment Paper'],['Kitchen Supplies','Wax Paper'],['Kitchen Supplies','Aluminum Foil'],
+  ['Kitchen Supplies','Plastic Wrap'],['Kitchen Supplies','Freezer Paper'],['Kitchen Supplies','Plastic Cups'],
+  ['Kitchen Supplies','Paper Plates'],['Kitchen Supplies','Plastic Silverware'],['Kitchen Supplies','Zip Loc Sandwich Bags'],
+  ['Kitchen Supplies','Zip Loc Quart Bags'],['Kitchen Supplies','Zip Loc Freezer Bags'],['Kitchen Supplies','Food Storage Containers'],
+  ['Kitchen Supplies','Reusable Ice Pack'],['Kitchen Supplies','Napkins'],
+  ['Bathroom Supplies','Toilet Paper'],['Bathroom Supplies','Hand Soap'],['Bathroom Supplies','Cotton Balls'],
+  ['Bathroom Supplies','Cotton Swabs'],['Bathroom Supplies','Kleenex'],['Bathroom Supplies','Baby Wipes'],
+  ['Bug Control','Fly Swatter'],['Bug Control','Fly Strips'],['Bug Control','Flea Treatment'],
+  ['Bug Control','Insect Spray'],['Bug Control','Yard Spray'],
+  ['Personal Supplies','Shampoo'],['Personal Supplies','Conditioner'],['Personal Supplies','Body Wash'],
+  ['Personal Supplies','Body Scrubber'],['Personal Supplies','Toothpaste'],['Personal Supplies','Toothbrush'],
+  ['Personal Supplies','Floss'],['Personal Supplies','Mouthwash'],['Personal Supplies','Deodorant'],
+  ['Personal Supplies','Razor / Hair Trimmer'],['Personal Supplies','Shaving Cream'],['Personal Supplies','Lotion'],
+  ['Personal Supplies','Lip Balm'],['Personal Supplies','Hairbrush / Comb'],['Personal Supplies','Hair Styling Products'],
+  ['Personal Supplies','Hair Bands'],['Personal Supplies','Face Wash'],['Personal Supplies','Bar Soap'],
+  ['Personal Supplies','Manicure Set'],['Personal Supplies','Acne Pads'],['Personal Supplies','Pimple Patches'],
+  ['Personal Supplies','Tampons'],['Personal Supplies','Condoms'],['Personal Supplies','Lube'],['Personal Supplies','Toiletries Bag'],
+  ['Pet Supplies','Dry Food'],['Pet Supplies','Wet Food'],['Pet Supplies','Treats'],['Pet Supplies','Litter'],['Pet Supplies','Flea Medicine'],
+  ['First Aid','Bandages'],['First Aid','Gauze Pads'],['First Aid','Medical Tape'],['First Aid','Antibiotic Ointment'],
+  ['First Aid','Peroxide'],['First Aid','Rubbing Alcohol'],['First Aid','Thermometer'],['First Aid','Ibuprofen'],
+  ['First Aid','Acetaminophen'],['First Aid','Naproxen Sodium'],['First Aid','Excedrin'],['First Aid','Benadryl'],
+  ['First Aid','Claritin'],['First Aid','Cold & Flu Meds'],['First Aid','Cough Drops'],['First Aid','Antacid'],
+  ['First Aid','Anti-Diarrhea'],['First Aid','Stool Softener'],['First Aid','Tweezers'],['First Aid','Reusable Ice Packs'],
+  ['First Aid','Reusable Hot Packs'],['First Aid','Heating Pad (2)'],['First Aid','Bug Spray'],['First Aid','Sunscreen'],['First Aid','Tanning Oil'],
+  ['Batteries','AA'],['Batteries','AAA'],['Batteries','C'],['Batteries','D'],['Batteries','9V'],
+  ['Light Bulbs','Can Lights'],['Light Bulbs','Philips Wiz Bulb'],['Light Bulbs','Regular White Light'],['Light Bulbs','Flashlights (4)'],
+  ['Misc / Home Maintenance','Extension Cords (6)'],['Misc / Home Maintenance','Surge Protectors (10)'],['Misc / Home Maintenance','Duct Tape'],
+  ['Misc / Home Maintenance','Electrical Tape'],['Misc / Home Maintenance','Packing Tape'],['Misc / Home Maintenance','Super Glue'],
+  ['Misc / Home Maintenance','Wood Glue'],['Misc / Home Maintenance','Command Strips'],['Misc / Home Maintenance','Furnace Filters'],
+  ['Misc / Home Maintenance','Ice Melt'],['Misc / Home Maintenance','Snow Shovel']
+];
+function getSupplyView(){
+  return store.supplyView === 'household' ? 'household' : 'cleaning';
+}
+function activeSupplyListKey(){
+  return getSupplyView()==='household' ? 'supplyListHousehold' : 'supplyListCleaning';
+}
+function renderSupplyViewToggle(){
+  const host = document.getElementById('supplyViewToggleHost');
+  if(!host) return;
+  const view = getSupplyView();
+  host.innerHTML =
+    '<button type="button" class="small-btn supply-view-btn" data-view="cleaning" style="'+(view==='cleaning'?'background:var(--accent,var(--clay));color:#fff;':'')+'">🧽 Cleaning Supplies</button>'+
+    '<button type="button" class="small-btn supply-view-btn" data-view="household" style="'+(view==='household'?'background:var(--accent,var(--clay));color:#fff;':'')+'">🏠 Household Supplies</button>';
+  host.querySelectorAll('.supply-view-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      store.supplyView = btn.dataset.view;
+      saveStore();
+      renderSupplyViewToggle();
+      renderSupplyList();
+    });
+  });
+}
 function initSupplies(){
-  if(!Array.isArray(store.supplyList)) store.supplyList = [];
+  if(!Array.isArray(store.supplyListCleaning)) store.supplyListCleaning = [];
+  if(!Array.isArray(store.supplyListHousehold)) store.supplyListHousehold = [];
+  if(!store.supplyListCleaning.length){
+    store.supplyListCleaning = DEFAULT_SUPPLY_ITEMS_CLEANING.map(([category,text])=>({ id:Date.now()+Math.random(), text, category, checked:false }));
+  }
+  if(!store.supplyListHousehold.length){
+    store.supplyListHousehold = DEFAULT_SUPPLY_ITEMS_HOUSEHOLD.map(([category,text])=>({ id:Date.now()+Math.random(), text, category, checked:false }));
+  }
+  saveStore();
+  renderSupplyViewToggle();
   renderSupplyList();
   document.getElementById('addSupplyBtn').addEventListener('click', addSupplyItem);
   document.getElementById('newSupplyInput').addEventListener('keydown', (e)=>{
     if(e.key==='Enter'){ e.preventDefault(); addSupplyItem(); }
   });
   document.getElementById('clearCheckedSuppliesBtn').addEventListener('click', ()=>{
-    store.supplyList = store.supplyList.filter(item=> !item.checked);
+    const key = activeSupplyListKey();
+    store[key] = store[key].filter(item=> !item.checked);
     saveStore(); renderSupplyList();
   });
 }
@@ -3262,7 +3352,7 @@ function addSupplyItem(){
   const input = document.getElementById('newSupplyInput');
   const text = input.value.trim();
   if(!text) return;
-  store.supplyList.push({ id:Date.now()+Math.random(), text, checked:false });
+  store[activeSupplyListKey()].push({ id:Date.now()+Math.random(), text, category:'Other', checked:false });
   input.value = '';
   saveStore();
   renderSupplyList();
@@ -3270,11 +3360,21 @@ function addSupplyItem(){
 function renderSupplyList(){
   const host = document.getElementById('supplyListHost');
   host.innerHTML = '';
-  if(!store.supplyList.length){
+  const list = store[activeSupplyListKey()];
+  if(!list.length){
     host.innerHTML = '<li class="muted no-print" style="list-style:none;">Nothing on the list right now — add something above.</li>';
     return;
   }
-  store.supplyList.forEach((item,ii)=>{
+  let lastCategory = null;
+  list.forEach((item,ii)=>{
+    const cat = item.category || 'Other';
+    if(cat !== lastCategory){
+      const catLi = document.createElement('li');
+      catLi.style.cssText = 'list-style:none; border-bottom:none; padding:14px 0 4px; font-weight:700; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft);';
+      catLi.textContent = cat;
+      host.appendChild(catLi);
+      lastCategory = cat;
+    }
     const li = document.createElement('li');
     li.style.display='flex'; li.style.alignItems='center'; li.style.gap='8px';
     li.innerHTML =
@@ -3284,10 +3384,10 @@ function renderSupplyList(){
     host.appendChild(li);
   });
   host.querySelectorAll('input[type="checkbox"]').forEach((cb,ii)=>{
-    cb.addEventListener('change', ()=>{ store.supplyList[ii].checked = cb.checked; saveStore(); });
+    cb.addEventListener('change', ()=>{ list[ii].checked = cb.checked; saveStore(); });
   });
   host.querySelectorAll('[data-del-supply]').forEach((btn,ii)=>{
-    btn.addEventListener('click', ()=>{ store.supplyList.splice(ii,1); saveStore(); renderSupplyList(); });
+    btn.addEventListener('click', ()=>{ list.splice(ii,1); saveStore(); renderSupplyList(); });
   });
 }
 
