@@ -1945,33 +1945,92 @@ const DEBTS = [
   { key:'ortho', label:'Orthodontist', target:275 },
   { key:'sparrow', label:'Sparrow Credit Card', target:336.96, note:'⚠️ Ask attorney first — opened after bankruptcy filing, likely not covered. Do not pay without asking your attorney first.' }
 ];
+/* One-time migration: fold the old single "paid so far" number into the new payment log,
+   so nobody's existing progress gets wiped when this switches to a running log. */
+function migrateDebtPayments(){
+  DEBTS.forEach(d=>{
+    const oldKey = 'paid_'+d.key, logKey = 'paymentLog_'+d.key;
+    if(!Array.isArray(store[logKey])){
+      store[logKey] = [];
+      const oldVal = parseFloat(store[oldKey]);
+      if(oldVal) store[logKey].push({ date: new Date().toISOString().slice(0,10), amount: oldVal, note:'Prior balance' });
+      delete store[oldKey];
+    }
+  });
+  saveStore();
+}
+function getDebtPaid(key){
+  const log = Array.isArray(store['paymentLog_'+key]) ? store['paymentLog_'+key] : [];
+  return log.reduce((s,e)=> s + (parseFloat(e.amount)||0), 0);
+}
 function renderDebtTrackers(){
   const host = document.getElementById('finDebtTrackers');
   if(host){
-    host.innerHTML = DEBTS.map(d=>(
-      '<div class="card">'+
-        '<div class="flex-between" style="margin-bottom:8px; flex-wrap:wrap; gap:8px;">'+
-          '<h4 style="margin:0;">'+d.label+'</h4>'+
-          '<div style="display:flex; align-items:center; gap:6px;">'+
-            '<span class="mono muted">$</span>'+
-            '<input type="number" data-store="paid_'+d.key+'" id="paid_'+d.key+'" style="width:110px;" placeholder="0">'+
-            '<span class="muted mono">paid / $'+d.target.toLocaleString()+'</span>'+
+    host.innerHTML = DEBTS.map(d=>{
+      const paid = getDebtPaid(d.key);
+      const remaining = Math.max(0, d.target - paid);
+      return (
+        '<div class="card">'+
+          '<div class="flex-between" style="margin-bottom:8px; flex-wrap:wrap; gap:8px;">'+
+            '<h4 style="margin:0;">'+d.label+'</h4>'+
+            '<span class="mono muted" id="debt-total-'+d.key+'">$'+paid.toLocaleString(undefined,{minimumFractionDigits:2})+' paid / $'+d.target.toLocaleString(undefined,{minimumFractionDigits:2})+' <span style="opacity:.75;">($'+remaining.toLocaleString(undefined,{minimumFractionDigits:2})+' left)</span></span>'+
           '</div>'+
-        '</div>'+
-        '<div class="progress-track"><div class="progress-fill" id="debt-bar-'+d.key+'" style="width:0%"></div></div>'+
-        (d.note ? '<p class="muted" style="margin-top:8px;">'+d.note+'</p>' : '')+
-      '</div>'
-    )).join('');
-    bindPersistentFields(host);
+          '<div class="progress-track"><div class="progress-fill" id="debt-bar-'+d.key+'" style="width:0%"></div></div>'+
+          '<div class="field-row no-print" style="margin-top:10px; align-items:flex-end;">'+
+            '<div class="field" style="max-width:150px;"><label>Date paid</label><input type="date" id="debtPayDate-'+d.key+'"></div>'+
+            '<div class="field" style="max-width:120px;"><label>Amount</label><input type="number" step="0.01" min="0" id="debtPayAmt-'+d.key+'" placeholder="0.00"></div>'+
+            '<div class="field" style="max-width:160px;"><button type="button" class="small-btn" data-log-payment="'+d.key+'" style="width:100%;">+ Log payment</button></div>'+
+          '</div>'+
+          '<div id="debtLog-'+d.key+'" style="margin-top:6px;"></div>'+
+          (d.note ? '<p class="muted" style="margin-top:8px;">'+d.note+'</p>' : '')+
+        '</div>'
+      );
+    }).join('');
     DEBTS.forEach(d=>{
-      document.getElementById('paid_'+d.key).addEventListener('input', renderDebtBars);
+      renderDebtLog(d.key);
+      const amtEl = document.getElementById('debtPayAmt-'+d.key);
+      amtEl.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); logDebtPayment(d.key); } });
+      document.querySelector('[data-log-payment="'+d.key+'"]').addEventListener('click', ()=> logDebtPayment(d.key));
     });
   }
   renderDebtBars();
 }
+function logDebtPayment(key){
+  const dateEl = document.getElementById('debtPayDate-'+key);
+  const amtEl = document.getElementById('debtPayAmt-'+key);
+  const amount = parseFloat(amtEl.value);
+  if(!amount) return;
+  const date = dateEl.value || new Date().toISOString().slice(0,10);
+  if(!Array.isArray(store['paymentLog_'+key])) store['paymentLog_'+key] = [];
+  store['paymentLog_'+key].push({ date, amount });
+  store['paymentLog_'+key].sort((a,b)=> new Date(a.date) - new Date(b.date));
+  saveStore();
+  renderDebtTrackers();
+}
+function renderDebtLog(key){
+  const host = document.getElementById('debtLog-'+key);
+  if(!host) return;
+  const log = Array.isArray(store['paymentLog_'+key]) ? store['paymentLog_'+key] : [];
+  if(!log.length){ host.innerHTML = '<p class="muted" style="font-size:.8rem; margin:4px 0 0;">No payments logged yet.</p>'; return; }
+  host.innerHTML = log.slice().reverse().map(e=>{
+    const i = log.indexOf(e);
+    return '<div class="flex-between" style="padding:3px 0; border-bottom:1px solid var(--line,#e5e2da); font-size:.85rem;">'+
+      '<span class="mono">'+e.date+' — $'+(parseFloat(e.amount)||0).toLocaleString(undefined,{minimumFractionDigits:2})+(e.note?' <span class="muted">('+e.note+')</span>':'')+'</span>'+
+      '<button class="small-btn no-print" data-del-debtpay data-key="'+key+'" data-i="'+i+'" style="padding:2px 8px; font-size:.7rem;">✕</button>'+
+    '</div>';
+  }).join('');
+  host.querySelectorAll('[data-del-debtpay]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const k = btn.dataset.key, i = parseInt(btn.dataset.i,10);
+      store['paymentLog_'+k].splice(i,1);
+      saveStore();
+      renderDebtTrackers();
+    });
+  });
+}
 function renderDebtBars(){
   DEBTS.forEach(d=>{
-    const v = parseFloat(store['paid_'+d.key]) || 0;
+    const v = getDebtPaid(d.key);
     const pct = Math.min(100, Math.round((v/d.target)*100));
     const finBar = document.getElementById('debt-bar-'+d.key);
     const dashBar = document.getElementById('dash-debt-bar-'+d.key);
@@ -3483,6 +3542,7 @@ function initBinder(){
 
   showPage('dashboard');
 
+  if(typeof migrateDebtPayments==='function') migrateDebtPayments();
   if(typeof initDashboard==='function') initDashboard();
   if(typeof initCheckin==='function') initCheckin();
   if(typeof initSobriety==='function') initSobriety();
